@@ -1,0 +1,12 @@
+# Core dependencies
+streamlit==1.31.0
+pandas==2.2.0
+
+# HTTP and data processing
+requests==2.31.0
+
+# Local LLM
+ollama==0.1.6
+
+# Utilities
+python-dotenv==1.0.0

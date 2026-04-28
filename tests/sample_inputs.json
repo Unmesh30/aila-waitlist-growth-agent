@@ -1,0 +1,51 @@
+{
+  "sample_posts": [
+    {
+      "title": "Looking for a comprehensive travel planning app",
+      "selftext": "Planning a 3-week backpacking trip through Europe and I'm completely overwhelmed. I have one app for flights, another for hotels, a spreadsheet for itinerary, Google Maps for locations... it's chaos. Does anyone know of an all-in-one solution that can handle everything? Budget is a concern too.",
+      "subreddit": "solotravel",
+      "author": "wanderlust_jane",
+      "score": 45,
+      "num_comments": 23,
+      "url": "https://reddit.com/r/solotravel/comments/example1",
+      "created_utc": 1710000000
+    },
+    {
+      "title": "Travel app recommendations for organizing everything?",
+      "selftext": "Going on my first international trip and feeling stressed about keeping track of bookings, documents, and itinerary. What do you all use?",
+      "subreddit": "travel",
+      "author": "first_timer_2024",
+      "score": 67,
+      "num_comments": 41,
+      "url": "https://reddit.com/r/travel/comments/example2",
+      "created_utc": 1710100000
+    },
+    {
+      "title": "Too many travel apps! Need help simplifying",
+      "selftext": "I literally have 8 different apps on my phone for travel planning. This can't be the best way. Anyone found a good solution that consolidates everything?",
+      "subreddit": "TravelHacks",
+      "author": "digital_nomad_pro",
+      "score": 89,
+      "num_comments": 52,
+      "url": "https://reddit.com/r/TravelHacks/comments/example3",
+      "created_utc": 1710200000
+    }
+  ],
+  "sample_comments": [
+    {
+      "body": "I feel your pain! I've tried TripIt but it's not great for everything. Still searching for the perfect solution.",
+      "score": 12,
+      "author": "commenter1"
+    },
+    {
+      "body": "Same problem here. Between flights, hotels, activities, and keeping track of confirmation numbers... it's a nightmare.",
+      "score": 8,
+      "author": "commenter2"
+    },
+    {
+      "body": "Have you looked into Google Travel? It's okay but missing some key features for longer trips.",
+      "score": 15,
+      "author": "commenter3"
+    }
+  ]
+}
