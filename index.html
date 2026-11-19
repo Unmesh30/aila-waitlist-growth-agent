@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aila Waitlist Agent — live demo</title>
+<meta name="description" content="Finds people asking for help with trip planning on Reddit and X, scores each post 0–100 and drafts a reply that a person approves before anything is posted.">
+<style>
+:root { --ink:#1f2328; --muted:#59636e; --line:#d1d9e0; --bg:#f6f8fa; --card:#ffffff; --accent:#1f6feb;
+        --accent-soft:#ddf4ff; --ok:#1a7f37; --ok-soft:#dafbe1; --no:#cf222e; --no-soft:#ffebe9; --warn-soft:#fff8c5; }
+* { box-sizing: border-box; }
+body { margin:0; font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+       color:var(--ink); background:var(--bg); }
+a { color:var(--accent); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
+header h1 { font-size: 30px; line-height:1.2; margin: 0 0 8px; }
+.lede { font-size: 18px; margin: 0 0 10px; }
+.byline, .muted, .note { color: var(--muted); }
+.byline { margin: 0 0 14px; }
+.notice { background: var(--warn-soft); border:1px solid #d4a72c55; border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+h2 { font-size: 20px; margin: 36px 0 12px; }
+.tiles { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.tile { background: var(--card); border:1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.tile .num { font-size: 30px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .label { color: var(--muted); font-size: 14px; }
+.guards { background: var(--card); border:1px solid var(--line); border-radius: 10px; padding: 6px 18px 6px 38px; margin:0; }
+.guards li { margin: 10px 0; padding-left: 4px; }
+.queue-head { display:flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.counts { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.card { background: var(--card); border:1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 12px 0; }
+.card[data-state="approved"] { border-color: var(--ok); box-shadow: inset 4px 0 0 var(--ok); }
+.card[data-state="rejected"] { border-color: var(--no); box-shadow: inset 4px 0 0 var(--no); opacity: .8; }
+.card-head { display:flex; gap: 14px; align-items: flex-start; }
+.score { flex: 0 0 auto; min-width: 58px; text-align:center; font-weight: 700; font-variant-numeric: tabular-nums;
+         border-radius: 8px; padding: 6px 8px; font-size: 18px; }
+.score-high { background: #0a3069; color: #fff; }
+.score-mid { background: #54aeff; color: #0a3069; }
+.score-low { background: var(--accent-soft); color: #0a3069; }
+.card-title h3 { font-size: 17px; margin: 2px 0 4px; line-height: 1.35; }
+.meta { margin: 0; color: var(--muted); font-size: 14px; }
+.tag { display:inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 9px; margin-left: 4px;
+       border: 1px solid var(--line); color: var(--ink); background: var(--bg); white-space: nowrap; }
+.tag-link::before { content: "🔗 "; }
+.tag-mention::before { content: "💬 "; }
+blockquote { margin: 12px 0 0; padding: 8px 12px; border-left: 3px solid var(--line); color: #393f46; background: var(--bg);
+             border-radius: 0 6px 6px 0; }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 15px; }
+.bars { margin: 10px 0 6px; display:grid; gap: 6px; }
+.bar-row { display:grid; grid-template-columns: 170px 1fr 40px; gap: 10px; align-items:center; font-size: 14px; }
+.bar-track { height: 10px; background: #eaeef2; border-radius: 999px; overflow:hidden; }
+.bar-fill { display:block; height: 100%; background: var(--accent); border-radius: 999px; }
+.bar-value { text-align:right; font-variant-numeric: tabular-nums; }
+.note { font-size: 14px; margin: 6px 0 0; }
+.reply { margin-top: 14px; background: var(--bg); border:1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.reply p { margin: 0; }
+.reply-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px !important; }
+.placeholder { color: var(--muted); font-style: italic; }
+.actions { display:flex; gap: 10px; align-items:center; margin-top: 14px; flex-wrap: wrap; }
+.btn { font: inherit; font-size: 15px; font-weight: 600; border-radius: 8px; padding: 7px 14px; cursor: pointer;
+       border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+.btn-approve:hover, .btn-approve[aria-pressed="true"] { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.btn-reject:hover, .btn-reject[aria-pressed="true"] { background: var(--no-soft); border-color: var(--no); color: var(--no); }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.state { color: var(--muted); font-size: 14px; }
+ol.steps { background: var(--card); border:1px solid var(--line); border-radius: 10px; padding: 12px 18px 12px 38px; margin: 0; }
+ol.steps li { margin: 6px 0; }
+footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+@media (max-width: 720px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .bar-row { grid-template-columns: 120px 1fr 34px; }
+  header h1 { font-size: 25px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Aila Waitlist Agent — live demo</h1>
+  <p class="lede">Finds people asking for help with trip planning on Reddit and X, scores each post 0–100, and drafts a reply
+  that a person approves before anything is posted.</p>
+  <p class="byline">Built by Unmesh Achar during his internship at Lunar Guide (Feb–Jun 2026) to grow the waitlist for Aila,
+  its AI travel planner · <a href="https://github.com/Unmesh30/aila-waitlist-growth-agent">Code on GitHub</a></p>
+  <p class="notice">This page is the real pipeline’s output on anonymised sample posts (<code>run_pipeline.py --demo</code>).
+  The language model is replaced by a stand-in, so the replies are marked as placeholders. The buttons below only change this page.</p>
+</header>
+
+<h2>This run at a glance</h2>
+<div class="tiles">
+  <div class="tile"><div class="num">11</div><div class="label">candidates scored</div></div>
+  <div class="tile"><div class="num">2</div><div class="label">dropped by community rules</div></div>
+  <div class="tile"><div class="num">9</div><div class="label">in the review queue</div></div>
+  <div class="tile"><div class="num">0</div><div class="label">posted automatically</div></div>
+</div>
+
+<h2>What the guardrails did</h2>
+<ul class="guards">
+  <li><strong>Dropped 2 posts</strong> from communities that don’t allow promotion, so they never reached the queue:<ul><li>“Overwhelmed planning my first solo trip to Japan, recommend an app?” <span class='muted'>(r/solotravel)</span></li><li>“Too many travel apps! Need help simplifying” <span class='muted'>(r/travel)</span></li></ul></li>
+  <li><strong>Kept only official sources</strong> for facts: replies cite <strong>europa.eu</strong> and <strong>travel.state.gov</strong>. The search also returned <strong>travel-blog.example.com</strong> (not an official source) and <strong>visa-help-gov.uk</strong> (look-alike: ends in “gov.uk” but isn’t it), and the allowlist rejected them.</li>
+  <li><strong>Removed the waitlist link from 7 replies</strong> in communities that allow a mention but not a link, and kept it in 2 replies on X.</li>
+  <li><strong>Posted nothing.</strong> Every reply waits for a person to approve or reject it.</li>
+</ul>
+
+<div class="queue-head">
+  <h2>Review queue, highest score first</h2>
+  <span class="counts" id="counts" aria-live="polite"></span>
+</div>
+
+    <article class="card" id="lead-1" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-high" aria-label="Lead score 94.5 out of 100">94.5</div>
+        <div class="card-title">
+          <h3>trip planning is stressful. any travel app recommendation that keeps flights, hotels and the itinerary together?</h3>
+          <p class="meta">Post · X · @demo_user_11 · 4 h old when scored <span class="tag tag-link">Link allowed</span></p>
+        </div>
+      </div>
+      
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:60%"></span></span><span class="bar-value">60</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:27%"></span></span><span class="bar-value">27</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, + 0.35 × X signal (90), capped at 100.</p><p class="note">Why: Travel: travel, trip, itinerary | Pain: travel app, trip planning, itinerary | Asks: recommend, ? | X: question_tweet, frustration, tool_intent</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this: https://joinaila.com/</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-2" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-high" aria-label="Lead score 84.5 out of 100">84.5</div>
+        <div class="card-title">
+          <h3>3 months across Southeast Asia: how do you keep bookings and visas organised?</h3>
+          <p class="meta">Post · r/digitalnomad · u/demo_user_01 · 5 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>I&#x27;m a remote worker planning three months in Thailand, Vietnam and Bali. Flights, stays, visa dates and the day-by-day itinerary are spread across five apps and a spreadsheet and I&#x27;m overwhelmed. Any recommendation for one app that keeps everything in one place?</blockquote>
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:54%"></span></span><span class="bar-value">54</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:39%"></span></span><span class="bar-value">39</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, + 20 for the community, capped at 100.</p><p class="note">Why: Travel: itinerary, flight, booking | High-quality travel subreddit: digitalnomad | Pain: itinerary, booking, visa | Asks: recommend, ?</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        <p class="note">Facts grounded only in: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-3" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-high" aria-label="Lead score 83.1 out of 100">83.1</div>
+        <div class="card-title">
+          <h3>how do you plan trips without 10 tabs open? need itinerary help for 4 days in Rome</h3>
+          <p class="meta">Post · X · @demo_user_12 · 9 h old when scored <span class="tag tag-link">Link allowed</span></p>
+        </div>
+      </div>
+      
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:29%"></span></span><span class="bar-value">29</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:60%"></span></span><span class="bar-value">60</span></div></div><p class="note">Total = weighted sum of the five scores, + 0.35 × X signal (72), capped at 100.</p><p class="note">Why: Travel: trip, itinerary | Pain: itinerary | Asks: help, need | X: question_tweet, tool_intent, has_replies</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this: https://joinaila.com/</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-4" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-high" aria-label="Lead score 74.0 out of 100">74.0</div>
+        <div class="card-title">
+          <h3>Do I need a visa for a Schengen stopover as a US citizen?</h3>
+          <p class="meta">Post · r/digitalnomad · u/demo_user_05 · 40 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>Planning a nomad stint in Portugal with a stopover in Germany. Do I need a visa, and what are the entry requirements? Any advice?</blockquote>
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:12%"></span></span><span class="bar-value">12</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:27%"></span></span><span class="bar-value">27</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:50%"></span></span><span class="bar-value">50</span></div></div><p class="note">Total = weighted sum of the five scores, + 20 for the community, capped at 100.</p><p class="note">Why: Travel: nomad, visa | High-quality travel subreddit: digitalnomad | Pain: visa | Asks: advice, need</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        <p class="note">Facts grounded only in: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-5" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-mid" aria-label="Lead score 69.6 out of 100">69.6</div>
+        <div class="card-title">
+          <h3>Best way to organise travel plans? I use 5 apps and still miss things</h3>
+          <p class="meta">Post · r/productivity · u/demo_user_03 · 30 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>Confirmation emails, a notes app, a spreadsheet, maps and the airline app. I still missed a hotel check-in time last trip. How do you all organise trip planning?</blockquote>
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:44%"></span></span><span class="bar-value">44</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:42%"></span></span><span class="bar-value">42</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: travel, trip, itinerary | Pain: trip planning, itinerary, overwhelmed | Asks: recommend, need</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-6" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-mid" aria-label="Lead score 58.8 out of 100">58.8</div>
+        <div class="card-title">
+          <h3>Moving to Lisbon: need help planning a trip home with two layovers</h3>
+          <p class="meta">Post · r/expats · u/demo_user_04 · 20 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>First trip back home since moving. The itinerary has two layovers and I&#x27;m worried about missed connections. Any tips or tools for planning this?</blockquote>
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:29%"></span></span><span class="bar-value">29</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: trip, itinerary | Pain: itinerary | Asks: help, need</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-7" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-mid" aria-label="Lead score 52.0 out of 100">52.0</div>
+        <div class="card-title">
+          <h3>Semester in Madrid: planning weekend trips is stressing me out</h3>
+          <p class="meta">Post · r/studyAbroad · u/demo_user_02 · 12 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>Studying abroad this spring and I want to plan weekend trips to Lisbon, Seville and Paris. Keeping track of trains, hostels and the itinerary is so stressful. Is there an app that helps plan all of it?</blockquote>
+      <details>
+        <summary>Score breakdown</summary>
+        <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:32%"></span></span><span class="bar-value">32</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: trip, itinerary, hostel | Pain: itinerary | Asks: help, ?</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-8" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-low" aria-label="Lead score 48.8 out of 100">48.8</div>
+        <div class="card-title">
+          <h3>3 months across Southeast Asia: how do you keep bookings and visas organised?</h3>
+          <p class="meta">Comment · r/digitalnomad · u/demo_user_08 · 4 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>Same problem here. I&#x27;d love one planner app for flights, stays and the itinerary. Can anyone recommend something that actually works?</blockquote><p class="note">This lead is a comment under the post titled above.</p>
+      <details>
+        <summary>Score breakdown</summary>
+        <p class="note">Comment leads are scored on the comment’s own words (shared pain, asks for recommendations): <strong>same problem, recommend, app for</strong>.</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        <p class="note">Facts grounded only in: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+    <article class="card" id="lead-9" data-state="waiting">
+      <div class="card-head">
+        <div class="score score-low" aria-label="Lead score 44.7 out of 100">44.7</div>
+        <div class="card-title">
+          <h3>Best way to organise travel plans? I use 5 apps and still miss things</h3>
+          <p class="meta">Comment · r/productivity · u/demo_user_10 · 25 h old when scored <span class="tag tag-mention">Mention only · link removed</span></p>
+        </div>
+      </div>
+      <blockquote>Following. I&#x27;m so overwhelmed planning a two-week trip, I need a better way to organise the itinerary. Any app recommendations?</blockquote><p class="note">This lead is a comment under the post titled above.</p>
+      <details>
+        <summary>Score breakdown</summary>
+        <p class="note">Comment leads are scored on the comment’s own words (shared pain, asks for recommendations): <strong>recommendations, recommend, following</strong>.</p>
+      </details>
+      <div class="reply">
+        <p class="reply-label">Drafted reply</p>
+        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
+        <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
+        <span class="state" aria-live="polite">Waiting for review</span>
+      </div>
+    </article>
+
+<h2>How it works</h2>
+<ol class="steps">
+  <li>Collect recent posts from travel communities on Reddit and from X.</li>
+  <li>Pull the top comments under promising posts and keep those that ask for help.</li>
+  <li>Score each lead 0–100: pain points 30%, requests 25%, engagement 20%, recency 15%, quality 10%.</li>
+  <li>Apply each community’s rules: a link, a mention only, or no promotion at all.</li>
+  <li>Ground any facts (visa, airline rules) in an allowlist of official domains.</li>
+  <li>Draft one reply per lead with a local language model, then enforce the community’s rules on the text again.</li>
+  <li>Queue everything for a person to approve or reject in the review dashboard.</li>
+</ol>
+
+<footer>
+  Generated from a demo run of the pipeline on 19 November 2026. Source code, tests and setup:
+  <a href="https://github.com/Unmesh30/aila-waitlist-growth-agent">github.com/Unmesh30/aila-waitlist-growth-agent</a>.
+</footer>
+</div>
+<script>
+(function () {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var labels = { approved: 'Approved — ready to post by hand', rejected: 'Rejected', waiting: 'Waiting for review' };
+  function refresh() {
+    var c = { waiting: 0, approved: 0, rejected: 0 };
+    cards.forEach(function (card) { c[card.getAttribute('data-state')] += 1; });
+    document.getElementById('counts').textContent =
+      'Waiting ' + c.waiting + ' · Approved ' + c.approved + ' · Rejected ' + c.rejected;
+  }
+  cards.forEach(function (card) {
+    card.querySelectorAll('.btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var next = card.getAttribute('data-state') === btn.dataset.action ? 'waiting' : btn.dataset.action;
+        card.setAttribute('data-state', next);
+        card.querySelectorAll('.btn').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.dataset.action === next));
+        });
+        card.querySelector('.state').textContent = labels[next];
+        refresh();
+      });
+    });
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>
