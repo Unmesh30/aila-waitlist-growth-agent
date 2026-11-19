@@ -1,6 +1,8 @@
 # Core dependencies
 streamlit==1.31.0
 pandas==2.2.0
+# Streamlit 1.31 needs NumPy 1.x; pyarrow 2x releases need NumPy 2, so pin a matching pyarrow
+pyarrow==15.0.2
 
 # HTTP and data processing
 requests==2.31.0

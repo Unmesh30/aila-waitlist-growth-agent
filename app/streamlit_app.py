@@ -138,8 +138,9 @@ def render_lead_card(lead):
 
     with col1:
         st.markdown(f"### {score_color} [{score:.1f}] {title}")
-        location_label = f"r/{subreddit}" if source == "reddit" else "x"
-        st.caption(f"{type_badge} · {location_label} · Reply to: **u/{reddit_username}**")
+        location_label = f"r/{subreddit}" if source == "reddit" else "X"
+        reply_handle = f"@{reddit_username}" if source == "x" else f"u/{reddit_username}"
+        st.caption(f"{type_badge} · {location_label} · Reply to: **{reply_handle}**")
 
         if source == "x":
             st.caption(f"Tweet by @{author} · {reddit_score} likes, {num_comments} replies")
