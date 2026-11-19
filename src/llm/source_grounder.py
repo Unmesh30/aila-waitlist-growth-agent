@@ -162,6 +162,16 @@ def _search_duckduckgo(query: str) -> List[Tuple[str, str]]:
     return results
 
 
+def _is_allowed_domain(domain: str, allowed_domains: List[str]) -> bool:
+    """True for an exact match or a real subdomain of an allowlisted domain.
+
+    "travel.state.gov" passes "state.gov", but "visa-help-gov.uk" does not pass "gov.uk"
+    and "baa.com" does not pass "aa.com" (a plain endswith check let both through).
+    """
+    domain = (domain or "").lower().rstrip(".")
+    return any(domain == allowed or domain.endswith("." + allowed) for allowed in allowed_domains)
+
+
 def _extract_domain(url: str) -> str:
     try:
         return urlparse(url).netloc.lower()
@@ -214,7 +224,7 @@ def gather_sources_for_lead(lead: Dict[str, Any]) -> List[Dict[str, str]]:
     for query in queries:
         for title, url in _search_duckduckgo(query):
             domain = _extract_domain(url)
-            if not any(domain.endswith(allowed) for allowed in allowed_domains):
+            if not _is_allowed_domain(domain, allowed_domains):
                 continue
             if url in seen_urls:
                 continue
