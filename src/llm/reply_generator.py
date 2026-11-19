@@ -119,8 +119,12 @@ class ReplyGenerator:
             return cleaned
 
         if not allow_link:
-            cleaned = cleaned.replace(AILA_WAITLIST_URL, "").strip()
-            cleaned = re.sub(r"https?://joinaila\.com/?", "", cleaned, flags=re.IGNORECASE).strip()
+            # Remove the link together with any ":" or dash that introduced it, so a sentence
+            # isn't left hanging on "...for exactly this:".
+            for pattern in (re.escape(AILA_WAITLIST_URL), r"https?://(?:www\.)?joinaila\.com/?\S*"):
+                cleaned = re.sub(r"\s*[:\-\u2013\u2014]?\s*" + pattern, "", cleaned, flags=re.IGNORECASE).strip()
+            if cleaned and cleaned[-1] not in ".!?)":
+                cleaned += "."
 
         if not allow_aila_mention:
             sentences = re.split(r"(?<=[.!?])\s+", cleaned)
