@@ -1,8 +1,55 @@
 # Aila Waitlist Agent
 
-**Local-first lead discovery and reply generation for building Aila's waitlist.**
+[![CI](https://github.com/Unmesh30/aila-waitlist-growth-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Unmesh30/aila-waitlist-growth-agent/actions/workflows/ci.yml)
 
-Automatically finds recent Reddit discussions from likely potential users, scores them by quality, and generates one personalized reply per selected lead using local Ollama (llama3).
+**Finds people asking for help with trip planning on Reddit and X, scores each post 0–100, and drafts a reply that a person approves before anything is posted.**
+
+I built this during my internship at Lunar Guide (Feb–Jun 2026) to grow the waitlist for Aila, its AI travel planner. – Unmesh Achar
+
+![Review dashboard on the demo data: leads ranked by score, the score breakdown, the outreach-safety checks and a drafted reply waiting for approval](docs/dashboard_demo.png)
+
+## In one minute
+
+- **The goal:** find Aila's first users among people already posting about stressful trip planning, and answer them in a way that helps first and respects each community's rules.
+- **What it does:** collects recent posts and comments, scores each one 0–100 with a weighted rule (pain points 30%, requests 25%, engagement 20%, recency 15%, quality 10%), keeps the best, and drafts one reply per lead with a local LLM through Ollama.
+- **Guardrails:**
+  - Each community's rules decide what a reply may contain: a link, a mention of Aila without a link, or no promotion at all. Leads from communities that don't allow promotion never reach the queue.
+  - After the model writes, a sanitizer enforces those rules again, removing any link or promotional sentence the community doesn't allow.
+  - Facts in replies, such as visa or airline rules, come only from an allowlist of official domains.
+- **A person approves everything:** nothing is posted automatically. Drafts wait in a Streamlit review dashboard, which the team used daily, where each one is approved or rejected and marked as posted once someone has posted it by hand.
+
+## Try it in about two minutes (no API keys, no Ollama)
+
+```bash
+git clone https://github.com/Unmesh30/aila-waitlist-growth-agent.git
+cd aila-waitlist-growth-agent
+python3 -m venv venv && source venv/bin/activate   # Python 3.11 or 3.12
+pip install -r requirements.txt
+python3 run_pipeline.py --demo       # runs the pipeline offline on bundled sample posts
+python3 launch_dashboard.py --demo   # opens the review dashboard at http://localhost:8501
+```
+
+Demo mode swaps only the network calls (Reddit, X, web search) and the model for bundled, anonymised sample data in `demo/fixtures/` and a stand-in whose replies are marked as placeholders. Scoring, comment extraction, the promotion rules, the source allowlist, the sanitizer, the database and the dashboard are the same code that runs live. Demo data goes to `data/demo/demo_leads.db`, separate from real leads.
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+17 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, and the dashboard (it renders the demo leads and records an approval). GitHub Actions runs them on Python 3.11 and 3.12 on every push.
+
+## Changes since the internship (November 2026)
+
+The original code from the internship is tagged [`v1.0-aila`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/v1.0-aila). Since then I have added:
+
+- An offline demo mode (`--demo`) with anonymised sample data.
+- 17 automated tests and a CI workflow.
+- **Fix:** the source allowlist matched domains by suffix, so a look-alike such as `visa-help-gov.uk` passed as `gov.uk`. It now accepts only the exact domain or a real subdomain.
+- **Fix:** where a community allows a mention but not a link, removing the link left a sentence hanging on "for exactly this:". The sentence now ends cleanly.
+- **Fix:** a fresh install could not start the dashboard, because newer pyarrow releases need NumPy 2, which Streamlit 1.31 doesn't support. pyarrow is now pinned.
+- The dashboard now shows X handles as @name instead of u/name.
 
 ## 🎯 What It Does
 
@@ -19,7 +66,7 @@ Automatically finds recent Reddit discussions from likely potential users, score
 Built with **local-first** principles:
 - ✅ **No paid APIs required** for core workflow
 - ✅ Uses Reddit's free public JSON API (no API key needed)
-- ✅ Uses local Ollama for reply generation (no OpenAI/Claude API)
+- ✅ Uses local Ollama for reply generation (no paid cloud API)
 - ✅ Runs completely offline after setup
 - ✅ SQLite database for persistence
 
@@ -27,8 +74,8 @@ Built with **local-first** principles:
 
 ## 📋 Requirements
 
-- **Python 3.8+**
-- **Ollama** with llama3 model installed
+- **Python 3.11 or 3.12** (both tested in CI)
+- **Ollama** with a local model (the setup below uses llama3; not needed for the demo)
 - Internet connection (for Reddit discovery only)
 
 ## 🚀 Setup
@@ -81,7 +128,7 @@ python3 run_pipeline.py
 ```
 
 This will:
-1. Search Reddit for travel pain point discussions (last 30 days)
+1. Search Reddit (and X, when `X_BEARER_TOKEN` is set in `.env`) for recent travel-planning discussions
 2. Extract top comments from promising posts
 3. Score each post as a potential lead (0-100)
 4. Generate one final reply for top leads using Ollama
@@ -132,6 +179,8 @@ Dashboard features:
 aila_waitlist_agent/
 ├── README.md                   # This file
 ├── requirements.txt            # Python dependencies
+├── requirements-dev.txt        # Test and lint tools
+├── .github/workflows/ci.yml    # Runs lint and tests on every push
 ├── .env.example               # Environment template
 ├── run_pipeline.py            # Main pipeline runner
 ├── launch_dashboard.py        # Dashboard launcher
@@ -142,9 +191,10 @@ aila_waitlist_agent/
 │   └── scoring.py            # Scoring weights/keywords
 │
 ├── src/                       # Source code
-│   ├── collectors/           # Reddit discovery
+│   ├── collectors/           # Reddit and X discovery
 │   │   ├── discovery_adapter.py      # Reddit API wrapper
 │   │   ├── reddit_recent_collector.py # Main collector
+│   │   ├── x_collector.py            # X (Twitter) recent search
 │   │   └── comment_extractor.py      # Comment fetcher
 │   │
 │   ├── scoring/              # Lead scoring
@@ -153,7 +203,8 @@ aila_waitlist_agent/
 │   │
 │   ├── llm/                  # Reply generation
 │   │   ├── ollama_client.py  # Ollama interface
-│   │   ├── reply_generator.py # Final reply generation
+│   │   ├── reply_generator.py # Final reply generation and sanitizer
+│   │   ├── source_grounder.py # Official-source allowlist for facts
 │   │   └── prompts.py        # Prompt templates
 │   │
 │   ├── storage/              # Database
@@ -183,7 +234,13 @@ aila_waitlist_agent/
 ├── logs/                     # Log files
 │   └── pipeline.log         # Pipeline logs
 │
-└── tests/                    # Test data
+├── demo/                     # Offline demo mode (--demo)
+│   └── fixtures/            # Anonymised sample posts, comments, tweets, search results
+│
+├── docs/
+│   └── dashboard_demo.png   # Dashboard screenshot (demo data)
+│
+└── tests/                    # pytest suite (run: pytest)
     └── sample_inputs.json   # Sample posts/comments
 ```
 
@@ -216,6 +273,13 @@ For each selected lead, Ollama generates one final reply. Replies are designed t
 - Avoid spam/marketing tone
 
 ## 🧪 Testing Locally
+
+### Run the Test Suite
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
 
 ### Test Ollama Connection
 
@@ -309,47 +373,34 @@ python3 run_pipeline.py
 
 ### Console Output
 
+Excerpt from `python3 run_pipeline.py --demo`:
+
 ```
-==============================================================
-STARTING DISCOVERY PIPELINE
-==============================================================
-
-[1/4] Collecting Reddit posts...
-Starting subreddit collection: 5 queries × 6 subreddits = 30 searches
-Collected 180 posts from subreddit searches
-Starting global Reddit search: 12 queries
-Collected 220 posts from global search
-Deduplication: 400 → 285 unique posts
-
-[2/4] Enriching top 30 posts with comments...
-Comment enrichment complete
-
-[3/4] Scoring posts...
-Scoring complete
-
-[4/4] Ranking and filtering leads...
-Filtering: 285 posts → 67 above threshold (40)
-Selected top 50 leads
-
-==============================================================
-RANKING SUMMARY
-==============================================================
-Total posts scored: 285
-Score range: 12.5 - 87.3 (avg: 45.2)
-
-Top matched keywords:
-  'itinerary': 45 posts
-  'planning stress': 38 posts
-  'recommend': 52 posts
-
-Top 10 leads:
-  1. [87.3] r/solotravel: Looking for comprehensive travel planning app...
-      → Pain points: itinerary, planning stress | Asks for: recommend, help
+DEMO MODE: bundled sample data, stub model, no network calls
+[1/5] Collecting Reddit posts...
+[1b/5] Collecting X tweets...
+Collected 9 raw candidates total (7 Reddit posts, 2 X tweets)
+...
+Found 2 high-intent comment leads
+[6/6] Ranking and filtering all leads...
+Promotion policy filter: excluded 2 disallowed/unclear leads before final queue
+After ranking: 9 leads kept after rules-based filtering (target: 15)
+...
+Top 9 leads:
+  1. 𝕏 [94.5] x: trip planning is stressful. any travel app recommendation th
+      → Travel: travel, trip, itinerary | Pain: travel app, trip pla
+  2. 𝕏 [83.1] x: how do you plan trips without 10 tabs open? need itinerary h
+      → Travel: trip, itinerary | Pain: itinerary | Asks: help, need
+  3. 📝 [84.5] r/digitalnomad: 3 months across Southeast Asia: how do you keep bookings and
+      → Travel: itinerary, flight, booking | High-quality travel sub
+...
+DRAFTING COMPLETE: 9 leads with replies
+Saved 9 new leads to database
 ```
 
 ### Dashboard View
 
-![Dashboard example - showing leads sorted by score with final replies]
+The screenshot at the top shows the review dashboard with the demo data.
 
 ## 🛠️ Configuration
 
@@ -432,9 +483,10 @@ ollama list
 
 ### Dashboard Won't Start
 
+If it fails with `pyarrow requires NumPy 2.0 or newer`, reinstall from `requirements.txt`, which pins a compatible pyarrow:
+
 ```bash
-# Check Streamlit is installed
-pip install streamlit
+pip install -r requirements.txt
 
 # Try direct launch
 streamlit run app/streamlit_app.py
