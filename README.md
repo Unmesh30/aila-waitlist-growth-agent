@@ -6,6 +6,8 @@
 
 I built this during my internship at Lunar Guide (Feb–Jun 2026) to grow the waitlist for Aila, its AI travel planner. – Unmesh Achar
 
+**Live demo:** https://unmesh30.github.io/aila-waitlist-growth-agent/ shows the pipeline's real output on sample posts: ranked leads, score breakdowns, what the guardrails dropped, and the drafted replies with approve and reject buttons.
+
 ![Review dashboard on the demo data: leads ranked by score, the score breakdown, the outreach-safety checks and a drafted reply waiting for approval](docs/dashboard_demo.png)
 
 ## In one minute
@@ -38,14 +40,15 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-17 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, and the dashboard (it renders the demo leads and records an approval). GitHub Actions runs them on Python 3.11 and 3.12 on every push.
+18 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, the dashboard (it renders the demo leads and records an approval) and the live-demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
 
 ## Changes since the internship (November 2026)
 
 The original code from the internship is commit [`ba1ea27`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/ba1ea27de94bd06b0d33bc0bf237ba2d7210b104). Since then I have added:
 
 - An offline demo mode (`--demo`) with anonymised sample data.
-- 17 automated tests and a CI workflow.
+- 18 automated tests and a CI workflow.
+- A live demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages.
 - **Fix:** the source allowlist matched domains by suffix, so a look-alike such as `visa-help-gov.uk` passed as `gov.uk`. It now accepts only the exact domain or a real subdomain.
 - **Fix:** where a community allows a mention but not a link, removing the link left a sentence hanging on "for exactly this:". The sentence now ends cleanly.
 - **Fix:** a fresh install could not start the dashboard, because newer pyarrow releases need NumPy 2, which Streamlit 1.31 doesn't support. pyarrow is now pinned.
@@ -235,6 +238,7 @@ aila_waitlist_agent/
 │   └── pipeline.log         # Pipeline logs
 │
 ├── demo/                     # Offline demo mode (--demo)
+│   ├── export_site.py       # Builds the live-demo page from a demo run
 │   └── fixtures/            # Anonymised sample posts, comments, tweets, search results
 │
 ├── docs/
