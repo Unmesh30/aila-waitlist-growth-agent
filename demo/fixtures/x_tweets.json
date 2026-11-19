@@ -1,0 +1,42 @@
+[
+  {
+    "title": "trip planning is stressful. any travel app recommendation that keeps flights, hotels and the itinerary together?",
+    "selftext": "trip planning is stressful. any travel app recommendation that keeps flights, hotels and the itinerary together?",
+    "url": "https://example.org/demo/x/demo_user_11/status/1",
+    "source": "x",
+    "source_id": "demo-x-1",
+    "subreddit": "x",
+    "author": "demo_user_11",
+    "reddit_username": "demo_user_11",
+    "lead_type": "tweet",
+    "score": 6,
+    "num_comments": 2,
+    "upvote_ratio": null,
+    "top_comments": [],
+    "date": null,
+    "engagement_score": 8,
+    "like_count": 6,
+    "reply_count": 2,
+    "age_hours": 4
+  },
+  {
+    "title": "how do you plan trips without 10 tabs open? need itinerary help for 4 days in Rome",
+    "selftext": "how do you plan trips without 10 tabs open? need itinerary help for 4 days in Rome",
+    "url": "https://example.org/demo/x/demo_user_12/status/2",
+    "source": "x",
+    "source_id": "demo-x-2",
+    "subreddit": "x",
+    "author": "demo_user_12",
+    "reddit_username": "demo_user_12",
+    "lead_type": "tweet",
+    "score": 3,
+    "num_comments": 4,
+    "upvote_ratio": null,
+    "top_comments": [],
+    "date": null,
+    "engagement_score": 7,
+    "like_count": 3,
+    "reply_count": 4,
+    "age_hours": 9
+  }
+]

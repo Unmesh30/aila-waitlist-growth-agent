@@ -17,6 +17,11 @@ def main():
     """Launch the Streamlit dashboard."""
     app_path = Path(__file__).parent / "app" / "streamlit_app.py"
 
+    if "--demo" in sys.argv:
+        # Review the leads written by `python3 run_pipeline.py --demo`.
+        os.environ["DATABASE_PATH"] = "data/demo/demo_leads.db"
+        print("DEMO MODE: showing data/demo/demo_leads.db")
+
     print("=" * 60)
     print("AILA WAITLIST AGENT - DASHBOARD")
     print("=" * 60)

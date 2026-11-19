@@ -1,0 +1,30 @@
+{
+  "https://example.org/demo/reddit/digitalnomad/post-01": [
+    {
+      "id": "demo-c1",
+      "body": "Same problem here. I'd love one planner app for flights, stays and the itinerary. Can anyone recommend something that actually works?",
+      "author": "demo_user_08",
+      "score": 14,
+      "permalink": "/demo/r/digitalnomad/post-01/comment-1",
+      "age_hours": 4
+    },
+    {
+      "id": "demo-c2",
+      "body": "Spreadsheets for life.",
+      "author": "demo_user_09",
+      "score": 3,
+      "permalink": "/demo/r/digitalnomad/post-01/comment-2",
+      "age_hours": 4
+    }
+  ],
+  "https://example.org/demo/reddit/productivity/post-03": [
+    {
+      "id": "demo-c3",
+      "body": "Following. I'm so overwhelmed planning a two-week trip, I need a better way to organise the itinerary. Any app recommendations?",
+      "author": "demo_user_10",
+      "score": 9,
+      "permalink": "/demo/r/productivity/post-03/comment-3",
+      "age_hours": 25
+    }
+  ]
+}

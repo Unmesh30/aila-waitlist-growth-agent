@@ -16,6 +16,12 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import argparse
 
+if "--demo" in sys.argv:
+    # Offline demo: must point settings at the demo database before config is imported.
+    from demo import configure_env
+
+    configure_env()
+
 from src.pipeline.discovery_pipeline import run_discovery_pipeline
 from src.pipeline.drafting_pipeline import run_drafting_pipeline
 from src.storage.repository import LeadRepository
@@ -49,6 +55,12 @@ def main():
     )
 
     parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run offline on bundled sample data (no Reddit, X, search or Ollama calls)",
+    )
+
+    parser.add_argument(
         "--max-comments",
         type=int,
         default=DEFAULT_MAX_POSTS_TO_ENRICH,
@@ -56,6 +68,13 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.demo:
+        from demo import install_stubs, reset_database
+
+        install_stubs()
+        reset_database()
+        logger.info("DEMO MODE: bundled sample data, stub model, no network calls")
 
     logger.info("=" * 80)
     logger.info("AILA WAITLIST AGENT - PIPELINE START")
@@ -108,7 +127,7 @@ def main():
         logger.info("PIPELINE COMPLETE")
         logger.info("=" * 80)
         logger.info("\nNext steps:")
-        logger.info("  1. Review leads in dashboard: python3 launch_dashboard.py")
+        logger.info("  1. Review leads in dashboard: python3 launch_dashboard.py" + (" --demo" if args.demo else ""))
         logger.info("  2. Approve leads you want to reply to")
         logger.info("  3. Manually post approved replies to Reddit")
 
