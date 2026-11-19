@@ -42,7 +42,7 @@ pytest
 
 ## Changes since the internship (November 2026)
 
-The original code from the internship is tagged [`v1.0-aila`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/v1.0-aila). Since then I have added:
+The original code from the internship is commit [`ba1ea27`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/ba1ea27de94bd06b0d33bc0bf237ba2d7210b104). Since then I have added:
 
 - An offline demo mode (`--demo`) with anonymised sample data.
 - 17 automated tests and a CI workflow.
