@@ -22,8 +22,13 @@ def test_export_site_from_demo_run(demo_run, tmp_path):
     with sqlite3.connect(demo_db) as con:
         queued = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
     assert page.count('<article class="card"') == queued
-    # Posts from communities that don't allow promotion are listed as dropped, not queued.
-    assert "(r/travel)" in page and "(r/solotravel)" in page
+    assert "made-up sample posts" in page
+    # What the run turned down is listed with the reason: community rules, age and comments that aren't leads.
+    assert "Communities that don’t allow promotion (3)" in page
+    assert "Too old for the daily queue (2)" in page
+    assert "Comments that aren’t asking for help (2)" in page
+    for community in ("r/travel", "r/solotravel", "r/backpacking"):
+        assert f"({community} · score" in page
     # The look-alike domain is shown as rejected; replies cite only official sources.
     assert "visa-help-gov.uk</strong> (look-alike" in page
     # Mention-only cards never carry the waitlist link.

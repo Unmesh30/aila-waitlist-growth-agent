@@ -6,7 +6,7 @@
 
 I built this during my internship at Lunar Guide (Feb–Jun 2026) to grow the waitlist for Aila, its AI travel planner. – Unmesh Achar
 
-**Live demo:** https://unmesh30.github.io/aila-waitlist-growth-agent/ shows the pipeline's real output on sample posts: ranked leads, score breakdowns, what the guardrails dropped, and the drafted replies with approve and reject buttons.
+**Interactive demo:** https://unmesh30.github.io/aila-waitlist-growth-agent/ shows the agent's real code run on made-up sample posts: ranked leads, score breakdowns, what it turned down and why, and the drafted replies with approve and reject buttons.
 
 ![Review dashboard on the demo data: leads ranked by score, the score breakdown, the outreach-safety checks and a drafted reply waiting for approval](docs/dashboard_demo.png)
 
@@ -31,7 +31,7 @@ python3 run_pipeline.py --demo       # runs the pipeline offline on bundled samp
 python3 launch_dashboard.py --demo   # opens the review dashboard at http://localhost:8501
 ```
 
-Demo mode swaps only the network calls (Reddit, X, web search) and the model for bundled, anonymised sample data in `demo/fixtures/` and a stand-in whose replies are marked as placeholders. Scoring, comment extraction, the promotion rules, the source allowlist, the sanitizer, the database and the dashboard are the same code that runs live. Demo data goes to `data/demo/demo_leads.db`, separate from real leads.
+Demo mode swaps only the network calls (Reddit, X, web search) and the model for bundled, made-up sample posts in `demo/fixtures/` and a stand-in model. The stand-in replays replies recorded from the real local model (`python3 run_pipeline.py --demo --record-replies`, which needs Ollama), or gives a labelled placeholder where none are recorded. Scoring, comment extraction, the promotion rules, the source allowlist, the sanitizer, the database and the dashboard are the same code that runs live. Demo data goes to `data/demo/demo_leads.db`, separate from real leads, and `data/demo/run_report.json` lists every candidate and what happened to it.
 
 ## Tests
 
@@ -40,18 +40,19 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-18 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, the dashboard (it renders the demo leads and records an approval) and the live-demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
+22 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, recording and replaying model replies, the dashboard (it renders the demo leads and records an approval) and the demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
 
 ## Changes since the internship (November 2026)
 
 The original code from the internship is commit [`ba1ea27`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/ba1ea27de94bd06b0d33bc0bf237ba2d7210b104). Since then I have added:
 
-- An offline demo mode (`--demo`) with anonymised sample data.
-- 18 automated tests and a CI workflow.
-- A live demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages.
+- An offline demo mode (`--demo`) on made-up sample posts, which can replay replies recorded once from the real local model (`--record-replies`).
+- 22 automated tests and a CI workflow.
+- An interactive demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages.
 - **Fix:** the source allowlist matched domains by suffix, so a look-alike such as `visa-help-gov.uk` passed as `gov.uk`. It now accepts only the exact domain or a real subdomain.
 - **Fix:** where a community allows a mention but not a link, removing the link left a sentence hanging on "for exactly this:". The sentence now ends cleanly.
 - **Fix:** a fresh install could not start the dashboard, because newer pyarrow releases need NumPy 2, which Streamlit 1.31 doesn't support. pyarrow is now pinned.
+- **Fix:** the reply style picked for each post was meant to stay the same, but Python's `hash()` of a string changes on every run, so it didn't. It now uses a stable checksum.
 - The dashboard now shows X handles as @name instead of u/name.
 
 ## 🎯 What It Does
@@ -70,7 +71,7 @@ Built with **local-first** principles:
 - ✅ **No paid APIs required** for core workflow
 - ✅ Uses Reddit's free public JSON API (no API key needed)
 - ✅ Uses local Ollama for reply generation (no paid cloud API)
-- ✅ Runs completely offline after setup
+- ✅ The model runs on your own computer; only collecting posts needs the internet
 - ✅ SQLite database for persistence
 
 **Discovery Engine:** Adapted from [last30days-skill](https://github.com/mvanhorn/last30days-skill) Reddit collection logic.
@@ -239,7 +240,7 @@ aila_waitlist_agent/
 │
 ├── demo/                     # Offline demo mode (--demo)
 │   ├── export_site.py       # Builds the live-demo page from a demo run
-│   └── fixtures/            # Anonymised sample posts, comments, tweets, search results
+│   └── fixtures/            # Made-up sample posts, comments, tweets, search results
 │
 ├── docs/
 │   └── dashboard_demo.png   # Dashboard screenshot (demo data)
