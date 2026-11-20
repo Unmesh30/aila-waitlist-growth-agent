@@ -63,8 +63,13 @@ summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 15
 .guard { font-size: 14px; margin: 8px 0 0; color: #0a3069; }
 .reply { margin-top: 14px; background: var(--bg); border:1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
 .reply p { margin: 0; }
+.reply-text p + p { margin-top: 8px; }
 .reply-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px !important; }
 .placeholder { color: var(--muted); font-style: italic; }
+.review { margin: 10px 0 0; font-size: 14px; border-radius: 8px; padding: 8px 12px; border: 1px solid var(--line); }
+.review-approve { background: var(--ok-soft); border-color: #1a7f3755; }
+.review-fix { background: var(--no-soft); border-color: #cf222e55; }
+.review-check { background: var(--warn-soft); border-color: #d4a72c55; }
 .actions { display:flex; gap: 10px; align-items:center; margin-top: 14px; flex-wrap: wrap; }
 .btn { font: inherit; font-size: 15px; font-weight: 600; border-radius: 8px; padding: 7px 14px; cursor: pointer;
        border: 1px solid var(--line); background: var(--card); color: var(--ink); }
@@ -92,7 +97,7 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
   its AI travel planner · <a href="https://github.com/Unmesh30/aila-waitlist-growth-agent">Code on GitHub</a></p>
   <div class="notice">
     <p>This page is the agent’s real code run on <strong>made-up sample posts</strong> (not real people), with
-    <code>run_pipeline.py --demo</code>. The language model is replaced by a stand-in here, so the replies are placeholders.</p>
+    <code>run_pipeline.py --demo</code>. The replies were written by qwen2.5:7b running locally through Ollama, using the agent’s real prompts, on 2026-11-19. They are not edited; any changes come from the agent’s own guardrails.</p>
     <p>Not shown here: collecting live posts from Reddit and X, the scheduled daily run, and saving review decisions.
     Those need the full app. The buttons below only change this page.</p>
   </div>
@@ -110,7 +115,7 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
 
 <h2>Guardrails on the replies</h2>
 <ul class="guards">
-  <li><strong>Official sources only</strong> for facts: replies use <strong>europa.eu</strong> and <strong>travel.state.gov</strong>. The search also returned <strong>travel-blog.example.com</strong> (not an official source) and <strong>visa-help-gov.uk</strong> (look-alike: ends in “gov.uk” but isn’t it), and the allowlist rejected them.</li>
+  <li><strong>Official sources only:</strong> the only pages given to the model were <strong>europa.eu</strong> and <strong>travel.state.gov</strong>. The search also returned <strong>travel-blog.example.com</strong> (not an official source) and <strong>visa-help-gov.uk</strong> (look-alike: ends in “gov.uk” but isn’t it), and the allowlist rejected them.</li>
   <li><strong>No link where it isn’t allowed:</strong> 12 replies are in communities that allow a mention of Aila but not a link, so they carry no link; 3 replies on X include it.</li>
   <li><strong>Nothing is posted automatically.</strong> Every reply waits for a person to approve or reject it.</li>
 </ul>
@@ -119,6 +124,7 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
   <h2>Review queue, highest score first</h2>
   <span class="counts" id="counts" aria-live="polite"></span>
 </div>
+<p class="note">Reviewer verdicts, written by hand after reading every draft: 10 approve, 4 fix before posting, 1 check the facts first. That review is the step that keeps the agent safe to use.</p>
 
     <article class="card" id="lead-1" data-state="waiting">
       <div class="card-head">
@@ -134,11 +140,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:60%"></span></span><span class="bar-value">60</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:27%"></span></span><span class="bar-value">27</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, + 0.35 × X signal (90), capped at 100.</p><p class="note">Why: Travel: travel, trip, itinerary | Pain: travel app, trip planning, itinerary | Asks: recommend, ? | X: question_tweet, frustration, tool_intent</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this: https://joinaila.com/</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I hear you! Try a centralized planner to keep everything in one place. We&#x27;re building Aila for just that—https://joinaila.com/ 🚀</p></div>
+        <p class="note">Guardrail: nothing needed removing.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Helpful first, honest that Aila is still being built, and links are allowed on X.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -159,11 +166,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:54%"></span></span><span class="bar-value">54</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:39%"></span></span><span class="bar-value">39</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, + 20 for the community, capped at 100.</p><p class="note">Why: Travel: itinerary, flight, booking | High-quality travel subreddit: digitalnomad | Pain: itinerary, booking, visa | Asks: recommend, ?</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I hear you! Managing flights, stays, and itineraries across multiple apps can be a headache. A planner app like Google Calendar with custom calendars for each destination could help keep everything organized in one place. You can color-code your events and set reminders to stay on top of your schedule.</p><p>For the travel-savvy: Consider sequencing your trips based on visa requirements and flight availability. For instance, check if you need a transit visa for Bangkok before booking your flights there.</p><p>We&#x27;re building Aila, an early-stage startup working on an all-in-one travel app that aims to simplify itinerary planning and real-time assistance. In the meantime, Google Calendar might save you some hassle!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
-        <p class="note">Facts pulled only from: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Practical advice, and no link, as this community requires.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -184,11 +192,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:29%"></span></span><span class="bar-value">29</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:60%"></span></span><span class="bar-value">60</span></div></div><p class="note">Total = weighted sum of the five scores, + 0.35 × X signal (72), capped at 100.</p><p class="note">Why: Travel: trip, itinerary | Pain: itinerary | Asks: help, need | X: question_tweet, tool_intent, has_replies</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this: https://joinaila.com/</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>Too many tabs can be overwhelming! Try a single document for all info. We&#x27;re building Aila to handle that for you. https://joinaila.com/</p></div>
+        <p class="note">Guardrail: nothing needed removing.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Short, useful and honest.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -209,11 +218,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:12%"></span></span><span class="bar-value">12</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:27%"></span></span><span class="bar-value">27</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:50%"></span></span><span class="bar-value">50</span></div></div><p class="note">Total = weighted sum of the five scores, + 20 for the community, capped at 100.</p><p class="note">Why: Travel: nomad, visa | High-quality travel subreddit: digitalnomad | Pain: visa | Asks: advice, need</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
-        <p class="note">Facts pulled only from: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>Sure! For a U.S. citizen, a short stopover in Germany (Schengen area) doesn&#x27;t typically require a visa if you&#x27;re just passing through an airport with no intention of leaving it. However, make sure to check the specific transit rules for airports like Frankfurt or Munich, as they can vary.</p><p>This applies to most layovers, but always double-check the official U.S. Department of State travel information and European Union documents for any changes or additional requirements.</p><p>For your nomad stint in Portugal with a stopover, it’s great that you’re planning ahead! Just ensure you have all necessary documents like your passport valid for at least three months beyond your stay.</p><p>We&#x27;re building Aila to help travelers like you plan and organize every step of their journey. From booking flights to managing itineraries, we aim to make travel smoother and more enjoyable once it’s ready. Stay tuned! 🌟</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
+        <p class="note">Sources given to the model: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
       </div>
+      <p class="review review-check"><strong>Reviewer: Check the facts first.</strong> The airport-transit and passport-validity rules aren’t in the official pages it was given. Confirm them on the State Department page before posting.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -234,11 +244,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:44%"></span></span><span class="bar-value">44</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:42%"></span></span><span class="bar-value">42</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: travel, trip, itinerary | Pain: trip planning, itinerary, overwhelmed | Asks: recommend, need</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get the struggle! It can be overwhelming with so many apps. First, try consolidating your info into a single travel document or app—it helps keep everything in one place. I recommend using a shared Google Doc for notes and updates; it&#x27;s easy to share and update on-the-go.</p><p>This keeps all your details together and makes sharing with travel companions super simple too. Plus, you can add sections for each day of your trip, sequencing activities logically to avoid rushing.</p><p>We&#x27;re building Aila, an early-stage startup aiming to make this process smoother by organizing itineraries, booking, and providing real-time help during trips. It&#x27;s still in development, but if you want to stay updated, we&#x27;ll notify waitlisters first.</p><p>Hope that helps!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Useful, and describes Aila only with its real description.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -259,11 +270,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="bar-value">0</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:40%"></span></span><span class="bar-value">40</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:40%"></span></span><span class="bar-value">40</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, + 0.35 × X signal (72), capped at 100.</p><p class="note">Why: Travel: flight, hotel | Asks: ? | X: question_tweet, tool_intent, has_replies</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this: https://joinaila.com/</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>Try a centralized planner like ours at Aila. It keeps everything in one place! 🗒️ https://joinaila.com/</p></div>
+        <p class="note">Guardrail: nothing needed removing.</p>
         
       </div>
+      <p class="review review-fix"><strong>Reviewer: Fix before posting.</strong> “Try a centralized planner like ours” reads as if Aila is already available.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -284,11 +296,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:24%"></span></span><span class="bar-value">24</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:40%"></span></span><span class="bar-value">40</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:30%"></span></span><span class="bar-value">30</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:92%"></span></span><span class="bar-value">92</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, + 20 for the community, capped at 100.</p><p class="note">Why: Travel: flight, booking | High-quality travel subreddit: digitalnomad | Pain: booking, budget | Asks: ?</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>Got it! First, I’d recommend using a shared spreadsheet or a travel app like Google Sheets to track your bookings and expenses in real-time. List out each booking (flights, hotels, tours) with dates and costs. This will help you stay on top of the budget easily.</p><p>This way, you can quickly see what’s booked versus what you’ve spent, which is super useful for a big trip like yours!</p><p>Plus, keeping everything in one place helps avoid those last-minute surprises. And if you’re looking for something more integrated, we&#x27;re building an all-in-one travel app called Aila that aims to handle exactly this—booking and budget tracking right from your phone. Stay tuned once it’s ready!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-fix"><strong>Reviewer: Fix before posting.</strong> “Budget tracking” isn’t in Aila’s description.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -309,11 +322,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:33%"></span></span><span class="bar-value">33</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: travel, trip, itinerary | Pain: itinerary | Asks: advice, help</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>First off, sounds like a great trip! For older travelers, I&#x27;d recommend starting with a JR Pass—it covers unlimited travel on most Japan Railways lines. Google Maps can also be your best friend for navigating the city. Just make sure to plan some easy walking routes and include rest days.</p><p>When you&#x27;re looking at day trips, consider places like Kamakura or Nikko where they can enjoy nature without too much walking. And don&#x27;t forget to explore Tokyo&#x27;s many museums and indoor attractions!</p><p>We&#x27;re building Aila right now, an all-in-one travel app for planning and real-time help during your trip. It might not be live yet, but you can join our waitlist to stay updated. Hope this helps!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Sensible plan for older travellers; the JR Pass advice is accurate.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -334,11 +348,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:29%"></span></span><span class="bar-value">29</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: trip, itinerary | Pain: itinerary | Asks: help, need</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get your concern about those layovers! First, make sure you have all your flight details handy—check the specific times and gate numbers for each connection. Set up push notifications for boarding calls or use an app like FlightAware to track your flights in real-time.</p><p>It’s also a good idea to allow extra time at each airport, especially if there are any potential issues with baggage or immigration. Keep important documents organized in a dedicated folder, including passport and visa information (check the official government website for specific requirements).</p><p>We’re building an app called Aila that aims to help with exactly this kind of planning—organizing itineraries and providing real-time travel assistance. Once we launch, you can sign up to stay updated.</p><p>In the meantime, staying organized and informed will really help smooth things out! Safe travels!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Practical layover advice that points to the official site for visa rules.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -359,11 +374,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:34%"></span></span><span class="bar-value">34</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:36%"></span></span><span class="bar-value">36</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:80%"></span></span><span class="bar-value">80</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: itinerary, flight, booking | Pain: itinerary, booking | Asks: recommend, ?</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get how stressful it can be keeping everyone on the same page, especially with so many moving parts! For your trip to Barcelona and Nice, a shared travel app like Aila could really help. We&#x27;re working on an all-in-one platform that lets you plan, book, and share itineraries in real-time among friends.</p><p>To avoid chaos, start by booking flights first as they often have fixed schedules. Then move on to accommodation, which can be flexible depending on your dates. Use a shared document or travel app to keep everyone updated. We&#x27;re building something that could streamline this process, but for now, consider using a simple spreadsheet or a dedicated travel planning app.</p><p>Hope this helps with your spring break plans!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-fix"><strong>Reviewer: Fix before posting.</strong> Says Aila lets friends share itineraries in real time, which isn’t in its description, and “an app like Aila could really help” sounds as if it’s available.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -384,11 +400,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="bar-value">20</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:32%"></span></span><span class="bar-value">32</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bar-value">100</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bar-value">70</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: trip, itinerary, hostel | Pain: itinerary | Asks: help, ?</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I hear you! Planning multiple weekend trips while studying abroad can be overwhelming. You might want to use a shared spreadsheet or a calendar app like Google Calendar to keep track of your dates, train schedules, and accommodation bookings for Lisbon, Seville, and Paris. This way, you can easily update and share information with friends.</p><p>Traveling frequently can be tiring, so it’s crucial to pace yourself. Maybe plan one big trip and two smaller ones to avoid burnout. Also, make sure to book your train tickets early as they tend to sell out quickly, especially during peak seasons.</p><p>We&#x27;re building Aila, an AI travel app that aims to simplify itinerary planning and provide real-time help on the go. Once it&#x27;s ready, we&#x27;ll be able to handle all these details for you! For now, stay organized and enjoy your adventures in Madrid!</p><p>Feel free to join our waitlist if you want to be among the first to try Aila when it’s ready.</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Helpful pacing advice; honest that Aila isn’t ready yet.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -409,11 +426,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <p class="note">Comment leads are scored on the comment’s own words (shared pain, asks for recommendations): <strong>same problem, recommend, app for</strong>.</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get it—organizing flights, stays, and itineraries can be a headache! For now, I recommend using a shared Google Sheet or a travel-specific app like TripIt to keep everything in one place. It helps to categorize your bookings by day and activity, so you always have an overview.</p><p>This system has helped many travelers stay organized on the go. Plus, it’s easy to share updates with friends or family who might be joining you!</p><p>We&#x27;re building Aila, an early-stage startup working on a comprehensive travel app that aims to handle all these tasks for you in one place.</p><p>Happy travels! 🚀✈️</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
-        <p class="note">Facts pulled only from: <a href="https://travel.state.gov/content/travel/en/international-travel.html">travel.state.gov</a>, <a href="https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm">europa.eu</a></p>
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> TripIt and Google Sheets are real, current tools.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -434,11 +452,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <p class="note">Comment leads are scored on the comment’s own words (shared pain, asks for recommendations): <strong>recommendations, recommend, following</strong>.</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get how overwhelming it can be planning a two-week trip with so many moving parts. Right now, my best advice is to use a simple spreadsheet or shared Google Doc to keep everything organized. List your destinations, activities, and bookings in one place—this helps you see the big picture and spot any gaps easily.</p><p>When it comes to organizing your itinerary, think about the flow of your trip: start with major attractions, then fill in the details like meals and local experiences. It&#x27;s also great to block out some free time each day for spontaneity!</p><p>We&#x27;re currently working on Aila, an early-stage AI travel app that aims to simplify all this for you. Once it launches, it might just be the tool you need to keep everything streamlined. In the meantime, try using a shared spreadsheet or Google Doc to stay organized.</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>; removed “I&#x27;ve been there!”.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Fine once the guardrail removed an invented “I’ve been there!”.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -459,11 +478,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <div class="bars"><div class="bar-row"><span class="bar-label">Pain points <span class="muted">×30%</span></span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="bar-value">0</span></div><div class="bar-row"><span class="bar-label">Requests <span class="muted">×25%</span></span><span class="bar-track"><span class="bar-fill" style="width:40%"></span></span><span class="bar-value">40</span></div><div class="bar-row"><span class="bar-label">Engagement <span class="muted">×20%</span></span><span class="bar-track"><span class="bar-fill" style="width:34%"></span></span><span class="bar-value">34</span></div><div class="bar-row"><span class="bar-label">Recency <span class="muted">×15%</span></span><span class="bar-track"><span class="bar-fill" style="width:78%"></span></span><span class="bar-value">78</span></div><div class="bar-row"><span class="bar-label">Quality <span class="muted">×10%</span></span><span class="bar-track"><span class="bar-fill" style="width:50%"></span></span><span class="bar-value">50</span></div></div><p class="note">Total = weighted sum of the five scores, capped at 100.</p><p class="note">Why: Travel: trip | Asks: ?</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get it! Multi-city trips can be a nightmare when schedules change. For Italy, I&#x27;d recommend using a spreadsheet or a shared document to keep track of train times, costs, and notes. It’s easier to edit and share with others that way.</p><p>This happens to everyone—trains often have last-minute changes. Just make sure to update your plan as soon as you get the new info.</p><p>Onward, when things settle down, we&#x27;re building Aila, an early-stage travel app designed to handle these kinds of itineraries seamlessly. Stay tuned for when it’s ready!</p><p>In the meantime, keep those spreadsheets handy and happy travels! 🚆✨</p><p>Join our waitlist if you want updates on Aila!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-approve"><strong>Reviewer: Approve.</strong> Useful; the opening “Onward, when things settle down” could be smoother.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -484,11 +504,12 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
         <p class="note">Comment leads are scored on the comment’s own words (shared pain, asks for recommendations): <strong>recommend, following</strong>.</p>
       </details>
       <div class="reply">
-        <p class="reply-label">Drafted reply · placeholder from the stand-in model</p>
-        <p><span class="placeholder">[Demo reply: placeholder text, not written by a model]</span> That planning overload is really common. What helps most is keeping flights, stays and the day-by-day plan in one place, and checking entry rules on the official government site. We&#x27;re building Aila, an all-in-one travel planner, for exactly this.</p>
-        
+        <p class="reply-label">Drafted reply · written by qwen2.5:7b running locally, not edited</p>
+        <div class="reply-text"><p>I totally get the struggle with a shared Google Doc! Try setting up a simple spreadsheet for everyone to update their bookings, then use a dedicated travel app like TripIt or Expensify to keep track of expenses and plans. This way, you can see everything in one place without chaos.</p><p>When splitting bookings, make sure to assign tasks early so everyone knows what they&#x27;re responsible for. And consider booking non-peak times to avoid last-minute stress.</p><p>We&#x27;re building Aila, an all-in-one travel app that&#x27;s designed to handle these exact issues—splitting bookings and keeping a shared itinerary organized. Once it’s ready, you can join our waitlist for updates!</p></div>
+        <p class="guard">Guardrail: removed the link <code>https://joinaila.com/</code>.</p>
         
       </div>
+      <p class="review review-fix"><strong>Reviewer: Fix before posting.</strong> “Splitting bookings” isn’t in Aila’s description.</p>
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -508,7 +529,7 @@ footer { margin-top: 36px; color: var(--muted); font-size: 14px; border-top: 1px
 </ol>
 
 <footer>
-  Generated from a demo run of the pipeline on 19 November 2026. Source code, tests and setup:
+  Generated from a demo run of the pipeline on 20 November 2026. Source code, tests and setup:
   <a href="https://github.com/Unmesh30/aila-waitlist-growth-agent">github.com/Unmesh30/aila-waitlist-growth-agent</a>.
 </footer>
 </div>
