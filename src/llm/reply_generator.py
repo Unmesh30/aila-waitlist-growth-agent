@@ -42,6 +42,25 @@ from config.x_settings import (
 logger = get_logger(__name__)
 
 
+# Instruction text a small model sometimes copies into its reply ("when direct links are allowed").
+LEAKED_RULE_RE = re.compile(
+    r"\s*\(?\b(?:only\s+)?(?:when|if)\s+(?:the\s+)?(?:direct\s+)?links?\s+(?:is|are)\s+allowed\b\)?",
+    re.IGNORECASE,
+)
+# First-person stories the model has no right to tell ("I've been there", "worked for me").
+INVENTED_EXPERIENCE_RE = re.compile(
+    r"\b(?:i've|i have) been there\b|\bbeen there myself\b|\bwhen i (?:planned|traveled|travelled|went|visited)\b"
+    r"|\b(?:worked|works) (?:well |great |fine )?for me\b|\bin my experience\b|\bmy parents\b",
+    re.IGNORECASE,
+)
+WAITLIST_LINK_RE = re.compile(r"https?://(?:www\.)?joinaila\.com\S*", re.IGNORECASE)
+# What's left of a call to action once its link is gone: "check out later", "updates here and", "is where you can".
+BROKEN_CTA_RE = re.compile(
+    r"(?i:\bcheck(?:\s+it)?\s+out)(?=\s+(?i:later|and|now|soon|today)\b|\s*[.!?]*$)"
+    r"|(?:\b(?i:and|or|at|to|on|via|here)|:)\s*[.!?]*$|^\s*[a-z]",
+)
+
+
 class ReplyGenerator:
     """Generates single high-quality reply for leads using local Ollama."""
 
@@ -162,16 +181,30 @@ class ReplyGenerator:
         for paragraph in re.split(r"\n\s*\n", cleaned):
             lines = []
             for line in paragraph.split("\n"):
-                line = re.sub(r"\[([^\]]*)\]\(([^)\s]*)\)", markdown_link, line)
-                # A removed link takes the "at", "via", ":" or dash that introduced it.
-                line = re.sub(
-                    r"(\s*(?:\b(?:at|via)\s+)?[:\-\u2013\u2014]?\s*)(https?://[^\s)\]]+)", bare_link, line
-                )
-                line = re.sub(r"(?<![\w@/.])@[A-Za-z0-9_]{2,15}\b", "", line)
-                if not allow_aila_mention:
-                    line = drop_promotion(line)
-                line = re.sub(r"[ \t]{2,}", " ", line)
-                line = re.sub(r"[ \t]+([,.!?;:])", r"\1", line).strip()
+                bracketed = re.fullmatch(r"\s*\[([^\]]+)\]\s*", line)
+                if bracketed:
+                    line = bracketed.group(1)
+                line = LEAKED_RULE_RE.sub("", line)
+                sentences = []
+                for sentence in re.split(r"(?<=[.!?])\s+", line):
+                    if INVENTED_EXPERIENCE_RE.search(sentence):
+                        continue
+                    had_blocked_link = not allow_link and bool(WAITLIST_LINK_RE.search(sentence))
+                    sentence = re.sub(r"\[([^\]]*)\]\(([^)\s]*)\)", markdown_link, sentence)
+                    # A removed link takes the "at", "via", ":" or dash that introduced it.
+                    sentence = re.sub(
+                        r"(\s*(?:\b(?:at|via)\s+)?[:\-\u2013\u2014]?\s*)(https?://[^\s)\]]+)", bare_link, sentence
+                    )
+                    sentence = re.sub(r"(?<![\w@/.])@[A-Za-z0-9_]{2,15}\b", "", sentence)
+                    sentence = re.sub(r"[ \t]{2,}", " ", sentence)
+                    sentence = re.sub(r"[ \t]+([,.!?;:])", r"\1", sentence).strip()
+                    if had_blocked_link and (not sentence or BROKEN_CTA_RE.search(sentence)):
+                        continue
+                    if not allow_aila_mention and drop_promotion(sentence) == "":
+                        continue
+                    if sentence:
+                        sentences.append(sentence)
+                line = " ".join(sentences).strip()
                 if line:
                     lines.append(line)
             if lines:

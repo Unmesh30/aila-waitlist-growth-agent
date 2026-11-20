@@ -60,3 +60,17 @@ def test_a_markdown_waitlist_link_goes_with_its_at():
 def test_paragraphs_and_endings_are_left_alone():
     text = "First tip.\n\n1. Book flights first.\n2. Then stays.\n\nHope that helps! 🚀"
     assert _clean(text) == text
+
+
+def test_copied_instructions_invented_stories_and_broken_sign_up_lines_are_removed():
+    raw = (
+        "I've been there! Keep one shared spreadsheet.\n\n"
+        "We're building Aila, an all-in-one travel planner. Check out https://joinaila.com/ later.\n\n"
+        "https://joinaila.com/ (when direct link is allowed)\n\n"
+        "[Join our waitlist at https://joinaila.com/ if you want updates!]"
+    )
+    assert _clean(raw) == (
+        "Keep one shared spreadsheet.\n\n"
+        "We're building Aila, an all-in-one travel planner.\n\n"
+        "Join our waitlist if you want updates!"
+    )
