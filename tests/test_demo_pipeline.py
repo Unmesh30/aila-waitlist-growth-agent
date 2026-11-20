@@ -2,6 +2,9 @@
 
 import json
 import sqlite3
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_demo_run_end_to_end(demo_run):
@@ -17,8 +20,11 @@ def test_demo_run_end_to_end(demo_run):
     # Both sources and comment-based leads come through.
     assert {lead["source"] for lead in leads} == {"reddit", "x"}
     assert any(lead["lead_type"] == "comment" for lead in leads)
+    recorded = json.loads((ROOT / "demo" / "fixtures" / "recorded_replies.json").read_text(encoding="utf-8"))["replies"]
     for lead in leads:
-        assert lead["reply"].startswith("[Demo reply")
+        # Each reply is the recorded model output after the guardrails, never the placeholder.
+        assert lead["url"] in recorded
+        assert lead["reply"] and not lead["reply"].startswith("[Demo reply")
         if lead["subreddit_policy_mode"] == "mention_only":
             assert "joinaila.com" not in lead["reply"]
         for source in json.loads(lead["reply_sources"] or "[]"):

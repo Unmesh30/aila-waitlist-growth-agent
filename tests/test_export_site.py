@@ -23,6 +23,12 @@ def test_export_site_from_demo_run(demo_run, tmp_path):
         queued = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
     assert page.count('<article class="card"') == queued
     assert "made-up sample posts" in page
+    # Every queued draft carries the reviewer's verdict, and the summary counts them.
+    assert page.count('<p class="review review-') == queued
+    assert "10 approve, 4 fix before posting, 1 check the facts first" in page
+    # Replies come from the recorded model output, not the placeholder.
+    assert "placeholder from the stand-in model" not in page
+    assert "written by qwen2.5:7b running locally" in page
     # What the run turned down is listed with the reason: community rules, age and comments that aren't leads.
     assert "Communities that don’t allow promotion (3)" in page
     assert "Too old for the daily queue (2)" in page
@@ -31,7 +37,8 @@ def test_export_site_from_demo_run(demo_run, tmp_path):
         assert f"({community} · score" in page
     # The look-alike domain is shown as rejected; replies cite only official sources.
     assert "visa-help-gov.uk</strong> (look-alike" in page
-    # Mention-only cards never carry the waitlist link.
+    # Mention-only cards never carry the waitlist link in the reply itself.
     for card in re.findall(r'<article class="card".*?</article>', page, flags=re.S):
         if "Mention only" in card:
-            assert "joinaila.com" not in card
+            reply = re.search(r'<div class="reply-text">(.*?)</div>', card, flags=re.S).group(1)
+            assert "joinaila.com" not in reply

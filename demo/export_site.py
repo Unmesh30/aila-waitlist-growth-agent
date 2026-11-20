@@ -29,7 +29,8 @@ from src.llm.source_grounder import OFFICIAL_DOMAIN_GROUPS, _is_allowed_domain  
 
 REPO_URL = "https://github.com/Unmesh30/aila-waitlist-growth-agent"
 PLACEHOLDER = "[Demo reply: placeholder text, not written by a model]"
-URL_RE = re.compile(r"https?://\S+")
+URL_RE = re.compile(r"https?://[^\s)\]]+")
+VERDICTS = {"approve": "Approve", "fix": "Fix before posting", "check": "Check the facts first"}
 COMPONENTS = [
     ("pain_point_score", "Pain points", "pain_points"),
     ("request_score", "Requests", "request"),
@@ -64,6 +65,11 @@ def load_leads(db_path: Path) -> list[dict]:
 
 def load_report(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def load_review_notes() -> dict:
+    path = FIXTURES / "review_notes.json"
+    return json.loads(path.read_text(encoding="utf-8")).get("notes", {}) if path.exists() else {}
 
 
 def grounding_summary(leads: list[dict]) -> tuple[list[str], list[tuple[str, str]]]:
@@ -190,7 +196,7 @@ def render_breakdown(lead: dict) -> str:
     )
 
 
-def render_card(lead: dict, index: int, recorded: dict) -> str:
+def render_card(lead: dict, index: int, recorded: dict, notes: dict) -> str:
     source = lead.get("source", "reddit")
     lead_type = lead.get("lead_type", "post")
     if source == "x":
@@ -218,7 +224,7 @@ def render_card(lead: dict, index: int, recorded: dict) -> str:
         links = ", ".join(
             f'<a href="{esc(s["url"])}">{esc(s.get("domain") or urlparse(s["url"]).netloc)}</a>' for s in lead["sources"]
         )
-        sources = f'<p class="note">Facts pulled only from: {links}</p>'
+        sources = f'<p class="note">Sources given to the model: {links}</p>'
 
     final = lead.get("reply") or ""
     entry = recorded.get(lead.get("url") or "")
@@ -234,6 +240,14 @@ def render_card(lead: dict, index: int, recorded: dict) -> str:
         label = "Drafted reply · placeholder from the stand-in model"
         guard = ""
         reply_html = render_text(final).replace(esc(PLACEHOLDER), f'<span class="placeholder">{esc(PLACEHOLDER)}</span>')
+
+    review = ""
+    note = notes.get(lead.get("url") or "")
+    if note and note.get("verdict") in VERDICTS:
+        review = (
+            f'<p class="review review-{note["verdict"]}"><strong>Reviewer: {VERDICTS[note["verdict"]]}.</strong> '
+            f'{esc(note.get("note", ""))}</p>'
+        )
 
     score = lead["lead_score"]
     band = "high" if score >= 70 else "mid" if score >= 50 else "low"
@@ -257,6 +271,7 @@ def render_card(lead: dict, index: int, recorded: dict) -> str:
         {guard}
         {sources}
       </div>
+      {review}
       <div class="actions">
         <button type="button" class="btn btn-approve" data-action="approved" aria-pressed="false">✓ Approve</button>
         <button type="button" class="btn btn-reject" data-action="rejected" aria-pressed="false">✕ Reject</button>
@@ -326,6 +341,10 @@ summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 15
 .reply-text p + p { margin-top: 8px; }
 .reply-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px !important; }
 .placeholder { color: var(--muted); font-style: italic; }
+.review { margin: 10px 0 0; font-size: 14px; border-radius: 8px; padding: 8px 12px; border: 1px solid var(--line); }
+.review-approve { background: var(--ok-soft); border-color: #1a7f3755; }
+.review-fix { background: var(--no-soft); border-color: #cf222e55; }
+.review-check { background: var(--warn-soft); border-color: #d4a72c55; }
 .actions { display:flex; gap: 10px; align-items:center; margin-top: 14px; flex-wrap: wrap; }
 .btn { font: inherit; font-size: 15px; font-weight: 600; border-radius: 8px; padding: 7px 14px; cursor: pointer;
        border: 1px solid var(--line); background: var(--card); color: var(--ink); }
@@ -388,7 +407,16 @@ def build_page(leads: list[dict], report: dict, recordings: dict) -> str:
     groups = said_no_groups(report)
     rejected_text = " and ".join(f"<strong>{esc(d)}</strong> ({esc(r)})" for d, r in rejected)
     used_text = " and ".join(f"<strong>{esc(d)}</strong>" for d in used)
-    cards = "".join(render_card(lead, i + 1, recorded) for i, lead in enumerate(leads))
+    notes = load_review_notes()
+    cards = "".join(render_card(lead, i + 1, recorded, notes) for i, lead in enumerate(leads))
+    verdicts = [notes[lead["url"]]["verdict"] for lead in leads if lead.get("url") in notes]
+    review_summary = ""
+    if verdicts:
+        review_summary = (
+            f'<p class="note">Reviewer verdicts, written by hand after reading every draft: '
+            f'{verdicts.count("approve")} approve, {verdicts.count("fix")} fix before posting, '
+            f'{verdicts.count("check")} check the facts first. That review is the step that keeps the agent safe to use.</p>'
+        )
 
     if has_recordings:
         model_text = " and ".join(esc(m) for m in models) or "a local model"
@@ -443,7 +471,7 @@ def build_page(leads: list[dict], report: dict, recordings: dict) -> str:
 
 <h2>Guardrails on the replies</h2>
 <ul class="guards">
-  <li><strong>Official sources only</strong> for facts: replies use {used_text}. The search also returned {rejected_text}, and the allowlist rejected them.</li>
+  <li><strong>Official sources only:</strong> the only pages given to the model were {used_text}. The search also returned {rejected_text}, and the allowlist rejected them.</li>
   <li><strong>No link where it isn’t allowed:</strong> {link_removed} replies are in communities that allow a mention of Aila but not a link, so they carry no link; {link_kept} replies on X include it.</li>
   <li><strong>Nothing is posted automatically.</strong> Every reply waits for a person to approve or reject it.</li>
 </ul>
@@ -452,6 +480,7 @@ def build_page(leads: list[dict], report: dict, recordings: dict) -> str:
   <h2>Review queue, highest score first</h2>
   <span class="counts" id="counts" aria-live="polite"></span>
 </div>
+{review_summary}
 {cards}
 
 <h2>How it works</h2>

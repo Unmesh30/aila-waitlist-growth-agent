@@ -6,7 +6,7 @@
 
 I built this during my internship at Lunar Guide (Feb–Jun 2026) to grow the waitlist for Aila, its AI travel planner. – Unmesh Achar
 
-**Interactive demo:** https://unmesh30.github.io/aila-waitlist-growth-agent/ shows the agent's real code run on made-up sample posts: ranked leads, score breakdowns, what it turned down and why, and the drafted replies with approve and reject buttons.
+**Interactive demo:** https://unmesh30.github.io/aila-waitlist-growth-agent/ shows the agent's real code run on made-up sample posts: ranked leads, score breakdowns, what it turned down and why, and replies written by a local model (`qwen2.5:7b`, unedited), each with what the guardrails removed and a reviewer's verdict.
 
 ![Review dashboard on the demo data: leads ranked by score, the score breakdown, the outreach-safety checks and a drafted reply waiting for approval](docs/dashboard_demo.png)
 
@@ -40,15 +40,15 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-27 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, recording and replaying model replies, the dashboard (it renders the demo leads and records an approval) and the demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
+28 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, recording and replaying model replies, the dashboard (it renders the demo leads and records an approval) and the demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
 
 ## Changes since the internship (November 2026)
 
 The original code from the internship is commit [`ba1ea27`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/ba1ea27de94bd06b0d33bc0bf237ba2d7210b104). Since then I have added:
 
 - An offline demo mode (`--demo`) on made-up sample posts, which can replay replies recorded once from the real local model (`--record-replies`).
-- 27 automated tests and a CI workflow.
-- An interactive demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages.
+- 28 automated tests and a CI workflow.
+- An interactive demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages. Its replies were recorded once from `qwen2.5:7b` and are replayed unedited; the reviewer verdicts (`demo/fixtures/review_notes.json`) were written by hand after reading every draft.
 - **Fix:** the source allowlist matched domains by suffix, so a look-alike such as `visa-help-gov.uk` passed as `gov.uk`. It now accepts only the exact domain or a real subdomain.
 - **Fix:** where a community allows a mention but not a link, removing the link left a sentence hanging on "for exactly this:". The sentence now ends cleanly.
 - **Fix:** a fresh install could not start the dashboard, because newer pyarrow releases need NumPy 2, which Streamlit 1.31 doesn't support. pyarrow is now pinned.

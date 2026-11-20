@@ -1,0 +1,66 @@
+{
+  "note": "Raw replies from a local model (Ollama) for the made-up sample posts, recorded with `python3 run_pipeline.py --demo --record-replies` and not edited. `--demo` replays them; the reply sanitizer still runs on every one.",
+  "recorded_on": "2026-11-19",
+  "replies": {
+    "https://example.org/demo/x/demo_user_11/status/1": {
+      "model": "qwen2.5:7b",
+      "raw": "I hear you! Try a centralized planner to keep everything in one place. We're building Aila for just that—https://joinaila.com/ 🚀"
+    },
+    "https://example.org/demo/x/demo_user_12/status/2": {
+      "model": "qwen2.5:7b",
+      "raw": "Too many tabs can be overwhelming! Try a single document for all info. We're building Aila to handle that for you. https://joinaila.com/"
+    },
+    "https://example.org/demo/x/demo_user_22/status/3": {
+      "model": "qwen2.5:7b",
+      "raw": "Try a centralized planner like ours at Aila. It keeps everything in one place! 🗒️ https://joinaila.com/"
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-01": {
+      "model": "qwen2.5:7b",
+      "raw": "I hear you! Managing flights, stays, and itineraries across multiple apps can be a headache. A planner app like Google Calendar with custom calendars for each destination could help keep everything organized in one place. You can color-code your events and set reminders to stay on top of your schedule.\n\nFor the travel-savvy: Consider sequencing your trips based on visa requirements and flight availability. For instance, check if you need a transit visa for Bangkok before booking your flights there.\n\nWe're building Aila, an early-stage startup working on an all-in-one travel app that aims to simplify itinerary planning and real-time assistance. Once it's ready, we'll be sharing updates here and at https://joinaila.com/. In the meantime, Google Calendar might save you some hassle!"
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-05": {
+      "model": "qwen2.5:7b",
+      "raw": "Sure! For a U.S. citizen, a short stopover in Germany (Schengen area) doesn't typically require a visa if you're just passing through an airport with no intention of leaving it. However, make sure to check the specific transit rules for airports like Frankfurt or Munich, as they can vary.\n\nThis applies to most layovers, but always double-check the official U.S. Department of State travel information and European Union documents for any changes or additional requirements.\n\nFor your nomad stint in Portugal with a stopover, it’s great that you’re planning ahead! Just ensure you have all necessary documents like your passport valid for at least three months beyond your stay.\n\nWe're building Aila to help travelers like you plan and organize every step of their journey. From booking flights to managing itineraries, we aim to make travel smoother and more enjoyable once it’s ready. Stay tuned! 🌟\n\n[Join the waitlist here when direct links are allowed:](https://joinaila.com/)"
+    },
+    "https://example.org/demo/reddit/productivity/post-03": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get the struggle! It can be overwhelming with so many apps. First, try consolidating your info into a single travel document or app—it helps keep everything in one place. I recommend using a shared Google Doc for notes and updates; it's easy to share and update on-the-go.\n\nThis keeps all your details together and makes sharing with travel companions super simple too. Plus, you can add sections for each day of your trip, sequencing activities logically to avoid rushing.\n\nWe're building Aila, an early-stage startup aiming to make this process smoother by organizing itineraries, booking, and providing real-time help during trips. It's still in development, but if you want to stay updated, we'll notify waitlisters first. https://joinaila.com/ is where you can sign up when direct links are allowed.\n\nHope that helps!"
+    },
+    "https://example.org/demo/reddit/expats/post-09": {
+      "model": "qwen2.5:7b",
+      "raw": "First off, sounds like a great trip! For older travelers, I'd recommend starting with a JR Pass—it covers unlimited travel on most Japan Railways lines. Google Maps can also be your best friend for navigating the city. Just make sure to plan some easy walking routes and include rest days.\n\nWhen you're looking at day trips, consider places like Kamakura or Nikko where they can enjoy nature without too much walking. And don't forget to explore Tokyo's many museums and indoor attractions!\n\nWe're building Aila right now, an all-in-one travel app for planning and real-time help during your trip. It might not be live yet, but you can join our waitlist at [https://joinaila.com/](https://joinaila.com/) to stay updated. Hope this helps!"
+    },
+    "https://example.org/demo/reddit/expats/post-04": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get your concern about those layovers! First, make sure you have all your flight details handy—check the specific times and gate numbers for each connection. Set up push notifications for boarding calls or use an app like FlightAware to track your flights in real-time.\n\nIt’s also a good idea to allow extra time at each airport, especially if there are any potential issues with baggage or immigration. Keep important documents organized in a dedicated folder, including passport and visa information (check the official government website for specific requirements).\n\nWe’re building an app called Aila that aims to help with exactly this kind of planning—organizing itineraries and providing real-time travel assistance. Once we launch, you can sign up at https://joinaila.com/ to stay updated.\n\nIn the meantime, staying organized and informed will really help smooth things out! Safe travels!"
+    },
+    "https://example.org/demo/reddit/studyAbroad/post-08": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get how stressful it can be keeping everyone on the same page, especially with so many moving parts! For your trip to Barcelona and Nice, a shared travel app like Aila could really help. We're working on an all-in-one platform that lets you plan, book, and share itineraries in real-time among friends.\n\nTo avoid chaos, start by booking flights first as they often have fixed schedules. Then move on to accommodation, which can be flexible depending on your dates. Use a shared document or travel app to keep everyone updated. We're building something that could streamline this process, but for now, consider using a simple spreadsheet or a dedicated travel planning app.\n\nHope this helps with your spring break plans! If you need more tips or want to stay updated on Aila when it's ready, check out https://joinaila.com/ later."
+    },
+    "https://example.org/demo/reddit/studyAbroad/post-02": {
+      "model": "qwen2.5:7b",
+      "raw": "I hear you! Planning multiple weekend trips while studying abroad can be overwhelming. You might want to use a shared spreadsheet or a calendar app like Google Calendar to keep track of your dates, train schedules, and accommodation bookings for Lisbon, Seville, and Paris. This way, you can easily update and share information with friends.\n\nTraveling frequently can be tiring, so it’s crucial to pace yourself. Maybe plan one big trip and two smaller ones to avoid burnout. Also, make sure to book your train tickets early as they tend to sell out quickly, especially during peak seasons.\n\nWe're building Aila, an AI travel app that aims to simplify itinerary planning and provide real-time help on the go. Once it's ready, we'll be able to handle all these details for you! For now, stay organized and enjoy your adventures in Madrid!\n\n[Feel free to join our waitlist at https://joinaila.com/ if you want to be among the first to try Aila when it’s ready.]"
+    },
+    "https://www.reddit.com/demo/r/digitalnomad/post-01/comment-1": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get it—organizing flights, stays, and itineraries can be a headache! For now, I recommend using a shared Google Sheet or a travel-specific app like TripIt to keep everything in one place. It helps to categorize your bookings by day and activity, so you always have an overview.\n\nThis system has helped many travelers stay organized on the go. Plus, it’s easy to share updates with friends or family who might be joining you!\n\nWe're building Aila, an early-stage startup working on a comprehensive travel app that aims to handle all these tasks for you in one place. Once we launch, I’d love for you to check out https://joinaila.com/ and see if it fits your needs.\n\nHappy travels! 🚀✈️"
+    },
+    "https://www.reddit.com/demo/r/productivity/post-03/comment-3": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get how overwhelming it can be planning a two-week trip with so many moving parts. I've been there! Right now, my best advice is to use a simple spreadsheet or shared Google Doc to keep everything organized. List your destinations, activities, and bookings in one place—this helps you see the big picture and spot any gaps easily.\n\nWhen it comes to organizing your itinerary, think about the flow of your trip: start with major attractions, then fill in the details like meals and local experiences. It's also great to block out some free time each day for spontaneity!\n\nWe're currently working on Aila, an early-stage AI travel app that aims to simplify all this for you. Once it launches, it might just be the tool you need to keep everything streamlined. In the meantime, try using a shared spreadsheet or Google Doc to stay organized. \n\nhttps://joinaila.com/ (when direct link is allowed)"
+    },
+    "https://www.reddit.com/demo/r/studyAbroad/post-08/comment-4": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get the struggle with a shared Google Doc! Try setting up a simple spreadsheet for everyone to update their bookings, then use a dedicated travel app like TripIt or Expensify to keep track of expenses and plans. This way, you can see everything in one place without chaos.\n\nWhen splitting bookings, make sure to assign tasks early so everyone knows what they're responsible for. And consider booking non-peak times to avoid last-minute stress.\n\nWe're building Aila, an all-in-one travel app that's designed to handle these exact issues—splitting bookings and keeping a shared itinerary organized. Once it’s ready, you can join our waitlist at https://joinaila.com/ for updates!"
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-10": {
+      "model": "qwen2.5:7b",
+      "raw": "Got it! First, I’d recommend using a shared spreadsheet or a travel app like Google Sheets to track your bookings and expenses in real-time. List out each booking (flights, hotels, tours) with dates and costs. This will help you stay on top of the budget easily.\n\nThis way, you can quickly see what’s booked versus what you’ve spent, which is super useful for a big trip like yours!\n\nPlus, keeping everything in one place helps avoid those last-minute surprises. And if you’re looking for something more integrated, we're building an all-in-one travel app called Aila that aims to handle exactly this—booking and budget tracking right from your phone. Stay tuned at [https://joinaila.com/](https://joinaila.com/) once it’s ready!"
+    },
+    "https://example.org/demo/reddit/productivity/post-11": {
+      "model": "qwen2.5:7b",
+      "raw": "I totally get it! Multi-city trips can be a nightmare when schedules change. For Italy, I'd recommend using a spreadsheet or a shared document to keep track of train times, costs, and notes. It’s easier to edit and share with others that way.\n\nThis happens to everyone—trains often have last-minute changes. Just make sure to update your plan as soon as you get the new info.\n\nOnward, when things settle down, we're building Aila, an early-stage travel app designed to handle these kinds of itineraries seamlessly. Stay tuned for when it’s ready!\n\nIn the meantime, keep those spreadsheets handy and happy travels! 🚆✨\n\n[Join our waitlist at https://joinaila.com/ if you want updates on Aila!]"
+    }
+  }
+}

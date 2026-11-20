@@ -1,0 +1,65 @@
+{
+  "note": "Reviewer notes written by hand after reading every recorded draft, the way drafts were reviewed before posting.",
+  "notes": {
+    "https://example.org/demo/x/demo_user_11/status/1": {
+      "verdict": "approve",
+      "note": "Helpful first, honest that Aila is still being built, and links are allowed on X."
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-01": {
+      "verdict": "approve",
+      "note": "Practical advice, and no link, as this community requires."
+    },
+    "https://example.org/demo/x/demo_user_12/status/2": {
+      "verdict": "approve",
+      "note": "Short, useful and honest."
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-05": {
+      "verdict": "check",
+      "note": "The airport-transit and passport-validity rules aren’t in the official pages it was given. Confirm them on the State Department page before posting."
+    },
+    "https://example.org/demo/reddit/productivity/post-03": {
+      "verdict": "approve",
+      "note": "Useful, and describes Aila only with its real description."
+    },
+    "https://example.org/demo/x/demo_user_22/status/3": {
+      "verdict": "fix",
+      "note": "“Try a centralized planner like ours” reads as if Aila is already available."
+    },
+    "https://example.org/demo/reddit/digitalnomad/post-10": {
+      "verdict": "fix",
+      "note": "“Budget tracking” isn’t in Aila’s description."
+    },
+    "https://example.org/demo/reddit/expats/post-09": {
+      "verdict": "approve",
+      "note": "Sensible plan for older travellers; the JR Pass advice is accurate."
+    },
+    "https://example.org/demo/reddit/expats/post-04": {
+      "verdict": "approve",
+      "note": "Practical layover advice that points to the official site for visa rules."
+    },
+    "https://example.org/demo/reddit/studyAbroad/post-08": {
+      "verdict": "fix",
+      "note": "Says Aila lets friends share itineraries in real time, which isn’t in its description, and “an app like Aila could really help” sounds as if it’s available."
+    },
+    "https://example.org/demo/reddit/studyAbroad/post-02": {
+      "verdict": "approve",
+      "note": "Helpful pacing advice; honest that Aila isn’t ready yet."
+    },
+    "https://www.reddit.com/demo/r/digitalnomad/post-01/comment-1": {
+      "verdict": "approve",
+      "note": "TripIt and Google Sheets are real, current tools."
+    },
+    "https://www.reddit.com/demo/r/productivity/post-03/comment-3": {
+      "verdict": "approve",
+      "note": "Fine once the guardrail removed an invented “I’ve been there!”."
+    },
+    "https://example.org/demo/reddit/productivity/post-11": {
+      "verdict": "approve",
+      "note": "Useful; the opening “Onward, when things settle down” could be smoother."
+    },
+    "https://www.reddit.com/demo/r/studyAbroad/post-08/comment-4": {
+      "verdict": "fix",
+      "note": "“Splitting bookings” isn’t in Aila’s description."
+    }
+  }
+}
