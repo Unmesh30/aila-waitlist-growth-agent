@@ -37,3 +37,11 @@ def test_run_report_explains_every_candidate(demo_run):
     assert sum(1 for c in report["comments"] if not c["became_lead"]) == 2
     with sqlite3.connect(demo_db) as con:
         assert con.execute("SELECT COUNT(*) FROM leads").fetchone()[0] == sum(c["kept"] for c in report["candidates"])
+
+
+def test_only_the_europe_question_gets_official_sources(demo_run):
+    _, demo_db = demo_run
+    with sqlite3.connect(demo_db) as con:
+        rows = con.execute("SELECT title, reply_sources FROM leads").fetchall()
+    grounded = {title for title, sources in rows if json.loads(sources or "[]")}
+    assert grounded == {"Do I need a visa for a Schengen stopover as a US citizen?"}

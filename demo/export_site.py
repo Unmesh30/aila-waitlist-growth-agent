@@ -128,16 +128,35 @@ def said_no_groups(report: dict) -> list[tuple[str, str, list[str]]]:
     return groups
 
 
+HANDLE_RE = re.compile(r"(?<![\w@/.])@[A-Za-z0-9_]{2,15}\b")
+
+
 def guardrail_changes(raw: str, final: str) -> list[str]:
     """Describe what the reply sanitizer removed from the model's raw text."""
+    flat_final = " ".join(final.split())
     changes = []
-    for link in URL_RE.findall(raw):
-        if link.rstrip(".,;:)!") not in final:
-            changes.append(f"removed the link <code>{esc(link.rstrip('.,;:)!'))}</code>")
+    for link in dict.fromkeys(URL_RE.findall(raw)):
+        link = link.rstrip(".,;:)!]")
+        if link not in final:
+            changes.append(f"removed the link <code>{esc(link)}</code>")
+    for handle in dict.fromkeys(HANDLE_RE.findall(raw)):
+        if not re.search(rf"(?<![\w@/.]){re.escape(handle)}\b", final):
+            changes.append(f"removed the handle <code>{esc(handle)}</code>")
     for sentence in re.split(r"(?<=[.!?])\s+", raw.strip()):
-        if sentence and not URL_RE.search(sentence) and sentence.strip() not in final:
-            changes.append(f"removed “{esc(sentence.strip())}”")
+        flat = " ".join(sentence.split())
+        if flat and not URL_RE.search(flat) and not HANDLE_RE.search(flat) and flat not in flat_final:
+            changes.append(f"removed “{esc(flat)}”")
     return changes
+
+
+def render_text(text: str) -> str:
+    """Show a reply the way Reddit would: paragraphs, line breaks and **bold**."""
+    paragraphs = []
+    for block in re.split(r"\n\s*\n", text.strip()):
+        html_block = esc(block)
+        html_block = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html_block)
+        paragraphs.append("<p>" + html_block.replace("\n", "<br>") + "</p>")
+    return "".join(paragraphs)
 
 
 def render_breakdown(lead: dict) -> str:
@@ -210,11 +229,11 @@ def render_card(lead: dict, index: int, recorded: dict) -> str:
             f'<p class="guard">Guardrail: {"; ".join(changes)}.</p>' if changes
             else '<p class="note">Guardrail: nothing needed removing.</p>'
         )
-        reply_html = esc(final)
+        reply_html = render_text(final)
     else:
         label = "Drafted reply · placeholder from the stand-in model"
         guard = ""
-        reply_html = esc(final).replace(esc(PLACEHOLDER), f'<span class="placeholder">{esc(PLACEHOLDER)}</span>')
+        reply_html = render_text(final).replace(esc(PLACEHOLDER), f'<span class="placeholder">{esc(PLACEHOLDER)}</span>')
 
     score = lead["lead_score"]
     band = "high" if score >= 70 else "mid" if score >= 50 else "low"
@@ -234,7 +253,7 @@ def render_card(lead: dict, index: int, recorded: dict) -> str:
       </details>
       <div class="reply">
         <p class="reply-label">{label}</p>
-        <p>{reply_html}</p>
+        <div class="reply-text">{reply_html}</div>
         {guard}
         {sources}
       </div>
@@ -304,6 +323,7 @@ summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 15
 .guard { font-size: 14px; margin: 8px 0 0; color: #0a3069; }
 .reply { margin-top: 14px; background: var(--bg); border:1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
 .reply p { margin: 0; }
+.reply-text p + p { margin-top: 8px; }
 .reply-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px !important; }
 .placeholder { color: var(--muted); font-style: italic; }
 .actions { display:flex; gap: 10px; align-items:center; margin-top: 14px; flex-wrap: wrap; }

@@ -40,18 +40,19 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-22 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, recording and replaying model replies, the dashboard (it renders the demo leads and records an approval) and the demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
+27 tests cover the scoring weights and ranking, de-duplication, the reply sanitizer, the source allowlist (including look-alike domains), the community promotion rules, parsing of X posts, the whole demo pipeline end to end, recording and replaying model replies, the dashboard (it renders the demo leads and records an approval) and the demo page. GitHub Actions runs them on Python 3.11 and 3.12 on every push.
 
 ## Changes since the internship (November 2026)
 
 The original code from the internship is commit [`ba1ea27`](https://github.com/Unmesh30/aila-waitlist-growth-agent/tree/ba1ea27de94bd06b0d33bc0bf237ba2d7210b104). Since then I have added:
 
 - An offline demo mode (`--demo`) on made-up sample posts, which can replay replies recorded once from the real local model (`--record-replies`).
-- 22 automated tests and a CI workflow.
+- 27 automated tests and a CI workflow.
 - An interactive demo page (`python3 -m demo.export_site --out site`), built from a demo run and published on GitHub Pages.
 - **Fix:** the source allowlist matched domains by suffix, so a look-alike such as `visa-help-gov.uk` passed as `gov.uk`. It now accepts only the exact domain or a real subdomain.
 - **Fix:** where a community allows a mention but not a link, removing the link left a sentence hanging on "for exactly this:". The sentence now ends cleanly.
 - **Fix:** a fresh install could not start the dashboard, because newer pyarrow releases need NumPy 2, which Streamlit 1.31 doesn't support. pyarrow is now pinned.
+- **Tightened after reading real drafts:** I ran the sample posts through the local model and read every reply. Drafts invented personal stories, product features, a citation and an X handle, and one recommended an app that shut down in 2019. The reply instructions now forbid these, and the cleanup step that runs after the model removes any link or @handle that isn't allowed, keeps paragraphs, and handles links written in markdown.
 - **Fix:** the reply style picked for each post was meant to stay the same, but Python's `hash()` of a string changes on every run, so it didn't. It now uses a stable checksum.
 - The dashboard now shows X handles as @name instead of u/name.
 

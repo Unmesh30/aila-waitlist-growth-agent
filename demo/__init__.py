@@ -90,7 +90,17 @@ def demo_enrich_posts_with_comments(
     return enriched
 
 
+EUROPE_WORDS = ("schengen", "europe", "germany", "portugal")
+
+
 def demo_search(query: str):
+    """The sample results are pages about entering Europe, so only questions about Europe get them.
+
+    A real search returns pages that fit each question; this keeps the demo from handing EU pages
+    to, say, a question about Southeast Asia.
+    """
+    if not any(word in query.lower() for word in EUROPE_WORDS):
+        return []
     return [tuple(result) for result in _load("search_results.json")]
 
 

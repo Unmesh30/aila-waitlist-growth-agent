@@ -42,6 +42,11 @@ def test_page_reports_what_the_sanitizer_removed():
     changes = guardrail_changes(RAW, final)
     assert len(changes) == 1 and "joinaila.com" in changes[0]
     assert guardrail_changes(RAW, RAW) == []
+    handle_raw = "Check out our app @AilaTravel for this."
+    handle_final = ReplyGenerator(ollama_client=demo.DemoLLMClient())._sanitize_reply(
+        handle_raw, allow_aila_mention=True, allow_link=True
+    )
+    assert guardrail_changes(handle_raw, handle_final) == ["removed the handle <code>@AilaTravel</code>"]
 
 
 def test_reply_style_is_the_same_in_every_run():
