@@ -5,6 +5,7 @@ Creates one natural, founder-tone reply focused on waitlist growth.
 """
 
 import re
+import zlib
 import time
 from collections import defaultdict
 from typing import Dict, Any, List, Optional
@@ -76,7 +77,8 @@ class ReplyGenerator:
             "thread_broadening",
         ]
         stable_key = lead.get("url") or lead.get("title") or ""
-        return variants[hash(stable_key) % len(variants)]
+        # zlib.crc32 gives the same number in every run; Python's hash() of a string changes per process.
+        return variants[zlib.crc32(stable_key.encode("utf-8")) % len(variants)]
 
     def _plan_outreach(self, lead: Dict[str, Any]) -> Dict[str, Any]:
         subreddit = lead.get("subreddit", "")
