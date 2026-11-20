@@ -115,30 +115,72 @@ class ReplyGenerator:
             "style_variant": self._choose_style_variant(lead),
         }
 
-    def _sanitize_reply(self, reply: str, allow_aila_mention: bool, allow_link: bool) -> str:
+    def _sanitize_reply(
+        self,
+        reply: str,
+        allow_aila_mention: bool,
+        allow_link: bool,
+        source_urls: Optional[List[str]] = None,
+    ) -> str:
+        """Enforce the outreach rules on the model's text, whatever the model wrote.
+
+        - Links: keep the waitlist link only where links are allowed, plus links to the official
+          sources the reply was given. Every other link goes (models invent them). A markdown link
+          keeps its words; a sentence whose only content is a disallowed link is dropped.
+        - @handles are removed (models invent accounts).
+        - Where promotion isn't allowed, sentences about Aila are removed.
+        - Paragraphs are kept; only runs of spaces are collapsed.
+        """
         cleaned = (reply or "").strip()
         if not cleaned:
             return cleaned
+        original = cleaned
 
-        if not allow_link:
-            # Remove the link together with any ":" or dash that introduced it, so a sentence
-            # isn't left hanging on "...for exactly this:".
-            for pattern in (re.escape(AILA_WAITLIST_URL), r"https?://(?:www\.)?joinaila\.com/?\S*"):
-                cleaned = re.sub(r"\s*[:\-\u2013\u2014]?\s*" + pattern, "", cleaned, flags=re.IGNORECASE).strip()
-            if cleaned and cleaned[-1] not in ".!?)":
-                cleaned += "."
+        allowed = {url.rstrip("/").lower() for url in (source_urls or []) if url}
+        if allow_link:
+            allowed.add(AILA_WAITLIST_URL.rstrip("/").lower())
 
-        if not allow_aila_mention:
-            sentences = re.split(r"(?<=[.!?])\s+", cleaned)
-            kept_sentences = []
-            for sentence in sentences:
-                lower = sentence.lower()
-                if "aila" in lower or "waitlist" in lower or "we're building" in lower or "working on" in lower:
-                    continue
-                kept_sentences.append(sentence)
-            cleaned = " ".join(kept_sentences).strip()
+        def is_allowed(url: str) -> bool:
+            return url.rstrip(".,;:!?)").rstrip("/").lower() in allowed
 
-        cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+        def markdown_link(match: re.Match) -> str:
+            text, target = match.group(1).strip(), match.group(2).strip()
+            if re.match(r"https?://", text):
+                # [https://...](https://...) is just a link: leave the bare URL for the rule below.
+                return target if re.match(r"https?://", target) else text
+            return match.group(0) if is_allowed(target) else text
+
+        def bare_link(match: re.Match) -> str:
+            return match.group(0) if is_allowed(match.group(2)) else ""
+
+        def drop_promotion(line: str) -> str:
+            sentences = re.split(r"(?<=[.!?])\s+", line)
+            words = ("aila", "waitlist", "we're building", "working on")
+            return " ".join(s for s in sentences if not any(word in s.lower() for word in words))
+
+        paragraphs = []
+        for paragraph in re.split(r"\n\s*\n", cleaned):
+            lines = []
+            for line in paragraph.split("\n"):
+                line = re.sub(r"\[([^\]]*)\]\(([^)\s]*)\)", markdown_link, line)
+                # A removed link takes the "at", "via", ":" or dash that introduced it.
+                line = re.sub(
+                    r"(\s*(?:\b(?:at|via)\s+)?[:\-\u2013\u2014]?\s*)(https?://[^\s)\]]+)", bare_link, line
+                )
+                line = re.sub(r"(?<![\w@/.])@[A-Za-z0-9_]{2,15}\b", "", line)
+                if not allow_aila_mention:
+                    line = drop_promotion(line)
+                line = re.sub(r"[ \t]{2,}", " ", line)
+                line = re.sub(r"[ \t]+([,.!?;:])", r"\1", line).strip()
+                if line:
+                    lines.append(line)
+            if lines:
+                paragraphs.append("\n".join(lines))
+        cleaned = "\n\n".join(paragraphs)
+
+        # If something was cut from the end, close the sentence again.
+        if cleaned and cleaned != original and cleaned[-1].isalnum():
+            cleaned += "."
         return cleaned
 
     def _record_outreach_outcome(self, lead: Dict[str, Any], planned_mention: bool, planned_link: bool, reply: str):
@@ -258,6 +300,7 @@ class ReplyGenerator:
             reply or "",
             allow_aila_mention=outreach_plan["allow_aila_mention"],
             allow_link=outreach_plan["allow_link"],
+            source_urls=[source.get("url", "") for source in sources],
         )
         self._record_outreach_outcome(
             lead,

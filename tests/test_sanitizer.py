@@ -30,3 +30,33 @@ def test_every_promotional_sentence_is_removed_where_promotion_is_not_allowed():
     assert "aila" not in cleaned.lower()
     assert "joinaila" not in cleaned.lower()
     assert cleaned == "Keeping everything in one place helps."
+
+
+def _clean(text, allow_link=False, source_urls=None):
+    return ReplyGenerator(ollama_client=DemoLLMClient())._sanitize_reply(
+        text, allow_aila_mention=True, allow_link=allow_link, source_urls=source_urls
+    )
+
+
+def test_invented_links_and_handles_are_removed():
+    cleaned = _clean(
+        "Check out our app @AilaTravel for this. [AirlineWise](https://airlinewise.com/) suggests one document.",
+        allow_link=True,
+    )
+    assert cleaned == "Check out our app for this. AirlineWise suggests one document."
+
+
+def test_links_to_the_official_sources_given_are_kept():
+    text = "See [the State Department](https://travel.state.gov/entry) for the entry rules."
+    assert _clean(text, source_urls=["https://travel.state.gov/entry"]) == text
+    assert _clean(text) == "See the State Department for the entry rules."
+
+
+def test_a_markdown_waitlist_link_goes_with_its_at():
+    text = "Join our waitlist at [https://joinaila.com/](https://joinaila.com/) so you can be first."
+    assert _clean(text) == "Join our waitlist so you can be first."
+
+
+def test_paragraphs_and_endings_are_left_alone():
+    text = "First tip.\n\n1. Book flights first.\n2. Then stays.\n\nHope that helps! 🚀"
+    assert _clean(text) == text
