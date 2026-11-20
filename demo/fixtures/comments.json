@@ -26,5 +26,25 @@
       "permalink": "/demo/r/productivity/post-03/comment-3",
       "age_hours": 25
     }
+  ],
+  "https://example.org/demo/reddit/studyAbroad/post-08": [
+    {
+      "id": "demo-c4",
+      "body": "Following. We tried a shared Google Doc last year and it was chaos. Would love an app recommendation too.",
+      "author": "demo_user_20",
+      "score": 8,
+      "permalink": "/demo/r/studyAbroad/post-08/comment-4",
+      "age_hours": 16
+    }
+  ],
+  "https://example.org/demo/reddit/expats/post-09": [
+    {
+      "id": "demo-c5",
+      "body": "A JR Pass and Google Maps worked fine for my parents.",
+      "author": "demo_user_21",
+      "score": 6,
+      "permalink": "/demo/r/expats/post-09/comment-5",
+      "age_hours": 24
+    }
   ]
 }

@@ -68,5 +68,75 @@
     "num_comments": 52,
     "url": "https://example.org/demo/reddit/travel/post-07",
     "age_hours": 8
+  },
+  {
+    "title": "Spring break with 6 friends: how do you split bookings and keep one shared itinerary?",
+    "selftext": "We're going to Barcelona and Nice. One person books the flights, another the apartment, and nobody knows the plan. Is there an app where everyone can see and edit the same itinerary?",
+    "subreddit": "studyAbroad",
+    "author": "demo_user_13",
+    "score": 27,
+    "num_comments": 14,
+    "url": "https://example.org/demo/reddit/studyAbroad/post-08",
+    "age_hours": 18
+  },
+  {
+    "title": "My parents are visiting me in Tokyo for two weeks. How do I plan their itinerary?",
+    "selftext": "First time planning for older travellers: not too much walking, rest days and a couple of day trips. I keep rewriting the plan in a notes app. Any advice or tools that help?",
+    "subreddit": "expats",
+    "author": "demo_user_14",
+    "score": 19,
+    "num_comments": 11,
+    "url": "https://example.org/demo/reddit/expats/post-09",
+    "age_hours": 26
+  },
+  {
+    "title": "A month in Mexico City: how do you track what's booked vs. what you've spent?",
+    "selftext": "Stays, flights and a few tours are booked on different sites and I've lost track of the budget. Is there a tool that keeps bookings and costs together?",
+    "subreddit": "digitalnomad",
+    "author": "demo_user_15",
+    "score": 16,
+    "num_comments": 8,
+    "url": "https://example.org/demo/reddit/digitalnomad/post-10",
+    "age_hours": 60
+  },
+  {
+    "title": "Anyone have a good system for multi-city trips? My Notion template keeps breaking",
+    "selftext": "Four cities in Italy with trains between each, and the template turns into a mess as soon as one train changes. What do you use to plan trips like this?",
+    "subreddit": "productivity",
+    "author": "demo_user_16",
+    "score": 23,
+    "num_comments": 12,
+    "url": "https://example.org/demo/reddit/productivity/post-11",
+    "age_hours": 120
+  },
+  {
+    "title": "What do you use to plan a 3-week route through the Balkans?",
+    "selftext": "Buses, hostels and border crossings, and my plan lives in three different apps. Recommendations welcome.",
+    "subreddit": "backpacking",
+    "author": "demo_user_17",
+    "score": 31,
+    "num_comments": 19,
+    "url": "https://example.org/demo/reddit/backpacking/post-12",
+    "age_hours": 14
+  },
+  {
+    "title": "Visa run from Bangkok: Laos or Malaysia?",
+    "selftext": "My visa exemption ends soon. Which is easier for a quick visa run, and how do you plan the trip?",
+    "subreddit": "digitalnomad",
+    "author": "demo_user_18",
+    "score": 9,
+    "num_comments": 6,
+    "url": "https://example.org/demo/reddit/digitalnomad/post-13",
+    "age_hours": 480
+  },
+  {
+    "title": "How did you plan weekend trips during a semester in Seoul?",
+    "selftext": "Looking for tips on planning weekend trips from Seoul. Did you use an app or just Google Docs?",
+    "subreddit": "studyAbroad",
+    "author": "demo_user_19",
+    "score": 4,
+    "num_comments": 2,
+    "url": "https://example.org/demo/reddit/studyAbroad/post-14",
+    "age_hours": 240
   }
 ]

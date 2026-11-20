@@ -23,3 +23,17 @@ def test_demo_run_end_to_end(demo_run):
             assert "joinaila.com" not in lead["reply"]
         for source in json.loads(lead["reply_sources"] or "[]"):
             assert source["domain"] in {"travel.state.gov", "europa.eu"}
+
+
+def test_run_report_explains_every_candidate(demo_run):
+    _, demo_db = demo_run
+    report = json.loads((demo_db.parent / "run_report.json").read_text(encoding="utf-8"))
+    turned_down = [c for c in report["candidates"] if not c["kept"]]
+    assert sorted(c["subreddit"] for c in turned_down if c["promo_mode"] == "disallowed_or_unclear") == [
+        "backpacking", "solotravel", "travel"
+    ]
+    assert sorted(round(c["age_hours"] / 24) for c in turned_down if c["recency_bucket"] == 4) == [10, 20]
+    assert len(turned_down) == 5
+    assert sum(1 for c in report["comments"] if not c["became_lead"]) == 2
+    with sqlite3.connect(demo_db) as con:
+        assert con.execute("SELECT COUNT(*) FROM leads").fetchone()[0] == sum(c["kept"] for c in report["candidates"])

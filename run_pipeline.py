@@ -61,6 +61,13 @@ def main():
     )
 
     parser.add_argument(
+        "--record-replies",
+        action="store_true",
+        help="With --demo: use the real local model (Ollama) and save its raw replies to "
+        "demo/fixtures/recorded_replies.json, so --demo can replay them",
+    )
+
+    parser.add_argument(
         "--max-comments",
         type=int,
         default=DEFAULT_MAX_POSTS_TO_ENRICH,
@@ -69,12 +76,18 @@ def main():
 
     args = parser.parse_args()
 
+    if args.record_replies and not args.demo:
+        parser.error("--record-replies only works together with --demo")
+
     if args.demo:
         from demo import install_stubs, reset_database
 
-        install_stubs()
+        install_stubs(record_replies=args.record_replies)
         reset_database()
-        logger.info("DEMO MODE: bundled sample data, stub model, no network calls")
+        if args.record_replies:
+            logger.info("DEMO MODE (recording): bundled sample data, real local model, replies saved for replay")
+        else:
+            logger.info("DEMO MODE: bundled sample data, stand-in model, no network calls")
 
     logger.info("=" * 80)
     logger.info("AILA WAITLIST AGENT - PIPELINE START")
